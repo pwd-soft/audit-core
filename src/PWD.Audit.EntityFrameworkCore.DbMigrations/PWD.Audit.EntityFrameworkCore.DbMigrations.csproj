@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>PWD.Attendance</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20220227110037_RemovedAbpTables.cs" />
+    <Compile Remove="Migrations\20220227110037_RemovedAbpTables.Designer.cs" />
+    <Compile Remove="Migrations\20220227110432_RemovedIdentityTables.cs" />
+    <Compile Remove="Migrations\20220227110432_RemovedIdentityTables.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PWD.Audit.EntityFrameworkCore\PWD.Audit.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.*">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>compile; contentFiles; build; buildMultitargeting; buildTransitive; analyzers; native</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

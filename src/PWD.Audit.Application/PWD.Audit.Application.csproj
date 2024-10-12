@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>PWD.Attendance</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PWD.Audit.Domain\PWD.Audit.Domain.csproj" />
+    <ProjectReference Include="..\PWD.Audit.Application.Contracts\PWD.Audit.Application.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="MailKit" Version="3.5.0" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.15" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.15" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.15">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+    <PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
+    <PackageReference Include="System.Threading" Version="4.3.0" />
+    <PackageReference Include="Volo.Abp.Account.Application" Version="4.3.3" />
+    <PackageReference Include="Volo.Abp.Identity.Application" Version="4.3.3" />
+    <PackageReference Include="Volo.Abp.PermissionManagement.Application" Version="4.3.3" />
+    <PackageReference Include="Volo.Abp.TenantManagement.Application" Version="4.3.3" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.Application" Version="4.3.3" />
+    <PackageReference Include="Volo.Abp.SettingManagement.Application" Version="4.3.3" />
+  </ItemGroup>
+
+</Project>
