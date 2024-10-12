@@ -35,7 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DtoModels\" />
     <Folder Include="InputDtos\" />
     <Folder Include="Interfaces\" />
   </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PWD.Audit.Entities;
 using Volo.Abp;
 
 namespace PWD.Audit.EntityFrameworkCore
@@ -18,6 +19,11 @@ namespace PWD.Audit.EntityFrameworkCore
             //    //...
             //});
 
+            builder.Entity<Objection>(b => b.ToTable("Objections"));
+            builder.Entity<Associate>(b => b.ToTable("Associates"));
+            builder.Entity<OfficeUser>(b => b.ToTable("OfficeUsers"));
+            builder.Entity<Summary>(b => b.ToTable("Summaries"));
+            builder.Entity<SummaryLine>(b => b.ToTable("SummaryLines"));
 
 
 

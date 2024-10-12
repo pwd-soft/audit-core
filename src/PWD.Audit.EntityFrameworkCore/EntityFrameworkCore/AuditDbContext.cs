@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PWD.Audit.Entities;
 using PWD.Audit.Users;
 using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;
@@ -20,12 +21,14 @@ namespace PWD.Audit.EntityFrameworkCore
     [ConnectionStringName("Default")]
     public class AuditDbContext : AbpDbContext<AuditDbContext>
     {
-
-
-
         /* Add DbSet properties for your Aggregate Roots / Entities here.
          * Also map them inside AuditDbContextModelCreatingExtensions.ConfigureAudit
          */
+        public DbSet<Objection> Objections { get; set; }
+        public DbSet<Associate> Associates { get; set; }
+        public DbSet<OfficeUser> OfficeUsers { get; set; }
+        public DbSet<Summary> Summaries { get; set; }
+        public DbSet<SummaryLine> SummaryLines { get; set; }
 
         public AuditDbContext(DbContextOptions<AuditDbContext> options)
             : base(options)
