@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System;
 using Volo.Abp.Authorization;
 
-namespace PWD.Schedule
+namespace PWD.Audit
 {
     public class PermissionPolicyProvider : IAuthorizationPolicyProvider
     {
