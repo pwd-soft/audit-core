@@ -36,7 +36,6 @@
 
   <ItemGroup>
     <Folder Include="InputDtos\" />
-    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>

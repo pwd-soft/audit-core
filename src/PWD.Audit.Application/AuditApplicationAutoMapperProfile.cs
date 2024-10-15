@@ -4,6 +4,7 @@ using PWD.Audit.DtoModels;
 using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
 using PWD.Audit.Models;
+using System.Collections.Generic;
 using Volo.Abp.AuditLogging;
 
 namespace PWD.Audit
@@ -18,12 +19,16 @@ namespace PWD.Audit
 
             CreateMap<Objection, ObjectionDto>();
             CreateMap<ObjectionDto, Objection>();
+
             CreateMap<Associate, AssociateDto>();
             CreateMap<AssociateDto, Associate>();
+
             CreateMap<OfficeUserDto, OfficeUser>();
             CreateMap<OfficeUser, OfficeUserDto>();
+
             CreateMap<Summary, SummaryDto>();
             CreateMap<SummaryDto, Summary>();
+
             CreateMap<SummaryLine, SummaryLineDto>();
             CreateMap<SummaryLineDto, SummaryLine>();
 
