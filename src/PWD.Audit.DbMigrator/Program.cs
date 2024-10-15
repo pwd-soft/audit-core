@@ -17,9 +17,9 @@ namespace PWD.Audit.DbMigrator
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("Volo.Abp", LogEventLevel.Warning)
 #if DEBUG
-                .MinimumLevel.Override("PWD.Attendance", LogEventLevel.Debug)
+                .MinimumLevel.Override("PWD.Audit", LogEventLevel.Debug)
 #else
-                .MinimumLevel.Override("PWD.Attendance", LogEventLevel.Information)
+                .MinimumLevel.Override("PWD.Audit", LogEventLevel.Information)
 #endif
                 .Enrich.FromLogContext()
                 .WriteTo.Async(c => c.File("Logs/logs.txt"))
