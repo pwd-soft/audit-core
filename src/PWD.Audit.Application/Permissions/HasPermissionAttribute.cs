@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using PWDEstimate;
+﻿using Microsoft.AspNetCore.Authorization; 
 using System;
 
-namespace PWD.Schedule
+namespace PWD.Audit
 {
     [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
     public class HasPermissionAttribute : AuthorizeAttribute

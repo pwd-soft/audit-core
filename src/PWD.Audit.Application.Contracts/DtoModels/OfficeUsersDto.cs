@@ -1,7 +1,7 @@
 ﻿using System;
 using Volo.Abp.Application.Dtos;
 
-namespace PWD.Attendance_Swagger.DtoModels
+namespace PWD.Audit.DtoModels
 {
     public class OfficeUserDto : EntityDto<int>
     {

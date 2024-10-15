@@ -1,4 +1,4 @@
-﻿namespace PWD.Schedule
+﻿namespace PWD.Audit
 {
     //public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
     //{

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PWDEstimate
+namespace PWD.Audit
 {
     public enum PermissionType
     {

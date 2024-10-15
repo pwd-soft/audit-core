@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PWD.Audit.Entities;
+using PWD.Audit.Models;
 using PWD.Audit.Users;
 using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;
@@ -29,6 +30,7 @@ namespace PWD.Audit.EntityFrameworkCore
         public DbSet<OfficeUser> OfficeUsers { get; set; }
         public DbSet<Summary> Summaries { get; set; }
         public DbSet<SummaryLine> SummaryLines { get; set; }
+        public DbSet<Posting> Postings { get; set; }
 
         public AuditDbContext(DbContextOptions<AuditDbContext> options)
             : base(options)

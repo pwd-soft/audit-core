@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Authorization;
 
-namespace PWD.Schedule
+namespace PWD.Audit
 {
     public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
     {
