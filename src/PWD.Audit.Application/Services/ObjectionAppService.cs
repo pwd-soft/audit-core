@@ -28,7 +28,7 @@ namespace PWD.Audit.Services
         public async Task<ObjectionDto> CreateAsync(ObjectionDto objectionInput)
         {
             var objection = ObjectMapper.Map<ObjectionDto, Objection>(objectionInput);
-            var newObjection = await _repository.InsertAsync(objection);
+            var newObjection = await _repository.InsertAsync(objection,true);
 
             return ObjectMapper.Map<Objection, ObjectionDto>(newObjection);
         }
