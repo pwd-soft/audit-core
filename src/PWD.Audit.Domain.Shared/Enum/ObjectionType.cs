@@ -1,5 +1,5 @@
 ﻿
-namespace PWD.Attendance.Enum
+namespace PWD.Audit.Enum
 {
     public enum ObjectionType
     {

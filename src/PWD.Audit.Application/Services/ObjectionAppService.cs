@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Nito.AsyncEx;
-using PWD.Attendance.Enum;
-using PWD.Attendance_Swagger.Interfaces;
+using PWD.Audit.Enum;
+using PWD.Audit.Interfaces;
 using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
 using System;
@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 
-namespace PWD.Attendance.Services
+namespace PWD.Audit.Services
 {
     public class ObjectionAppService : ApplicationService, IObjectionAppService
     {
