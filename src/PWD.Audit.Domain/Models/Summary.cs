@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Volo.Abp.Domain.Entities.Auditing;
 
 
@@ -11,5 +12,6 @@ namespace PWD.Audit.Entities
         public string FinancialYear { get; set; }
         public string ReferenceNo { get; set; }
         public int Note{ get; set; }
+        public List<SummaryLine> SummaryLines { get; set; }=new List<SummaryLine>();
     }
 }

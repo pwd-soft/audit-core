@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Volo.Abp.Application.Dtos;
 
 namespace PWD.Audit.DtoModels
@@ -10,6 +11,7 @@ namespace PWD.Audit.DtoModels
         public string FinancialYear { get; set; }
         public string ReferenceNo { get; set; }
         public int Note { get; set; }
+        public List<SummaryLineDto> SummaryLines { get; set; }=new List<SummaryLineDto>();
     }
 
 }
