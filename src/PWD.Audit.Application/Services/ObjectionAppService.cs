@@ -68,6 +68,12 @@ namespace PWD.Audit.Services
 
         public async Task<List<ObjectionDto>> GetListAsync() => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
 
+        public async Task<List<ObjectionDto>> GetListByOfficeIdAsync(Guid officeId)
+        {
+            var objectionList = await _repository.GetListAsync(i => i.OfficeId == officeId);
+            return ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList);
+        }
+
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
 
         //private async Task<List<ObjectionDto>> AllData () => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
