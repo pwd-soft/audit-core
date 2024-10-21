@@ -82,22 +82,22 @@ namespace PWD.Audit.Services
             //queryableList.Where(o => o.OfficeId == filterCriteria.OfficeId);
 
             if (filterCriteria.OfficeId is not null)
-                queryableList.Where(o => o.OfficeId == filterCriteria.OfficeId);
+                queryableList = queryableList.Where(o => o.OfficeId == filterCriteria.OfficeId);
 
             if (filterCriteria.DirectorateType > 0)
-                queryableList.Where(o => o.DirectorateType == filterCriteria.DirectorateType);
+                queryableList = queryableList.Where(o => o.DirectorateType == filterCriteria.DirectorateType);
 
             if (filterCriteria.ObjectionType > 0)
-                queryableList.Where(o => o.ObjectionType == filterCriteria.ObjectionType);
+                queryableList = queryableList.Where(o => o.ObjectionType == filterCriteria.ObjectionType);
 
-            if (filterCriteria.FinancialYear is not null)
+            if (!String.IsNullOrEmpty(filterCriteria.FinancialYear))
                 queryableList.Where(o => o.FinancialYear == filterCriteria.FinancialYear);
 
             if (filterCriteria.IsBroadSheet)
-                queryableList.Where(o => o.IsBroadSheet == filterCriteria.IsBroadSheet);
+                queryableList = queryableList.Where(o => o.IsBroadSheet == filterCriteria.IsBroadSheet);
 
             if (filterCriteria.IsResolved)
-                queryableList.Where(o => o.IsResolved == filterCriteria.IsResolved);
+                queryableList = queryableList.Where(o => o.IsResolved == filterCriteria.IsResolved);
 
             var objectionList = queryableList.ToList();
             
