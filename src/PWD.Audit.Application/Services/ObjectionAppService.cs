@@ -62,9 +62,9 @@ namespace PWD.Audit.Services
 
         public async Task<ObjectionDto> GetByIdAsync(int id)
         {
-            var objection = await _repository.GetAsync(id);
-            var objectionDto = ObjectMapper.Map<Objection, ObjectionDto>(objection);
-            return objectionDto;
+            var objectionWithDetails = await _repository.WithDetailsAsync(o => o.Associates);
+            var objection = objectionWithDetails.FirstOrDefault(o => o.Id == id);
+            return ObjectMapper.Map<Objection, ObjectionDto>(objection);
         }
 
         public async Task<List<ObjectionDto>> GetListAsync() => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
