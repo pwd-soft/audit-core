@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Volo.Abp.ObjectMapping;
 
 namespace PWD.Audit.Services
 {
@@ -57,6 +59,41 @@ namespace PWD.Audit.Services
             }
 
             var updatedItem = await _repository.UpdateAsync(dbItem);
+
+            var newAssociates = objectionInput.Associates.Where(a => a.Id < 0).ToList();
+            if (newAssociates.Any())
+            {
+                foreach (var item in newAssociates)
+                {
+                    item.Id = 0;
+                    item.ObjectionId = updatedItem.Id;
+                }
+
+                var newAssociatesEntity = ObjectMapper.Map<List<AssociateDto>, List<Associate>>(newAssociates);
+                if (newAssociatesEntity.Count() > 1)
+                {
+                    await _associateRepository.InsertManyAsync(newAssociatesEntity);
+                }
+                else
+                {
+                    await _associateRepository.InsertAsync(newAssociatesEntity.FirstOrDefault());
+                }
+            }
+
+            var updateAssociates = objectionInput.Associates.Where(a => a.Id > 0).ToList();
+            if (updateAssociates.Any())
+            {
+                var updateAssociatesEntity = ObjectMapper.Map<List<AssociateDto>, List<Associate>>(updateAssociates);
+                if (updateAssociatesEntity.Count() > 1)
+                {
+                    await _associateRepository.UpdateManyAsync(updateAssociatesEntity);
+                }
+                else
+                {
+                    await _associateRepository.UpdateAsync(updateAssociatesEntity.FirstOrDefault());
+                }
+            }
+
             return ObjectMapper.Map<Objection, ObjectionDto>(updatedItem);
         }
 
