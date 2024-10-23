@@ -65,7 +65,7 @@ namespace PWD.Audit.Services
         }
 
 
-        public async Task<bool> IsValid(OfficeUserDto dto) => await _repository.AnyAsync(x => x.UserId == dto.UserId);
+        public async Task<bool> IsValid(OfficeUserDto dto) => await _repository.AnyAsync(x => x.UserId == dto.UserId && x.IsActive);
          
         //private async Task<List<OfficeUserDto>> AllData () => ObjectMapper.Map<List<OfficeUser>, List<OfficeUserDto>>(await _repository.GetListAsync());
     }
