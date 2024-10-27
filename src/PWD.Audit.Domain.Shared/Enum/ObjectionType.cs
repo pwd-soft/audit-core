@@ -4,9 +4,9 @@ namespace PWD.Audit.Enum
     public enum ObjectionType
     {
         None = 0,
-        SFI = 1,
-        NonSFI = 2,
-        Draft = 3,
+        Draft = 1,
+        SFI = 2,
+        NonSFI = 3,
     }
 
     public enum DirectorateType
