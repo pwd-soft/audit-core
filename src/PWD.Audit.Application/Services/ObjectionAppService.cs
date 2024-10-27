@@ -14,6 +14,7 @@ using Volo.Abp.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Volo.Abp.ObjectMapping;
+using PWD.Attendance_Swagger.DtoModels;
 
 namespace PWD.Audit.Services
 {
@@ -137,11 +138,49 @@ namespace PWD.Audit.Services
                 queryableList = queryableList.Where(o => o.IsResolved == filterCriteria.IsResolved);
 
             var objectionList = queryableList.ToList();
-            
+
             //var objectionList = queryableList.Skip(filterCriteria.Offset)
             //    .Take(filterCriteria.Limit).ToList();
 
             return ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList);
+        }
+
+        public async Task<GenericListDto<ObjectionDto>> SearchObjectionsWithPaging(ObjectionFilterModel filterCriteria)
+        {
+            GenericListDto<ObjectionDto> objectionList = new GenericListDto<ObjectionDto>();
+
+            var queryableList = await _repository.GetQueryableAsync();
+            //queryableList.Where(o => o.OfficeId == filterCriteria.OfficeId);
+
+            if (filterCriteria.OfficeId is not null)
+                queryableList = queryableList.Where(o => o.OfficeId == filterCriteria.OfficeId);
+
+            if (filterCriteria.DirectorateType > 0)
+                queryableList = queryableList.Where(o => o.DirectorateType == filterCriteria.DirectorateType);
+
+            if (filterCriteria.ObjectionType > 0)
+                queryableList = queryableList.Where(o => o.ObjectionType == filterCriteria.ObjectionType);
+
+            if (!String.IsNullOrEmpty(filterCriteria.FinancialYear))
+                queryableList.Where(o => o.FinancialYear == filterCriteria.FinancialYear);
+
+            if (filterCriteria.IsBroadSheet)
+                queryableList = queryableList.Where(o => o.IsBroadSheet == filterCriteria.IsBroadSheet);
+
+            if (filterCriteria.IsResolved)
+                queryableList = queryableList.Where(o => o.IsResolved == filterCriteria.IsResolved);
+
+
+            objectionList.CountData = queryableList.Count();
+
+            //queryableList = queryableList
+            //    //.OrderByDescending(o => o.CreationTime)
+            //    .Skip(filterCriteria.Offset)
+            //    .Take(filterCriteria.Limit);
+
+            objectionList.ListData = ObjectMapper.Map<IQueryable<Objection>, List<ObjectionDto>>(queryableList);
+
+            return objectionList;
         }
 
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
