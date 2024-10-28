@@ -44,6 +44,9 @@ namespace PWD.Audit.DtoModels
         public virtual string code { get; set; }
         public virtual string displayName { get; set; }
         public virtual string civilEm { get; set; }
+        public string displayNameBn { get; set; }
+        public string layer { get; set; }
+        public string type { get; set; }
         public virtual List<OrgRoleConsumeDto> roles { get; set; }
         public virtual List<string> roleNames { get; set; } = new List<string>();
 
