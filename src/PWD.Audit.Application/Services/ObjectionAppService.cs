@@ -61,12 +61,11 @@ namespace PWD.Audit.Services
 
             var updatedItem = await _repository.UpdateAsync(dbItem);
 
-            var newAssociates = objectionInput.Associates.Where(a => a.Id < 0).ToList();
+            var newAssociates = objectionInput.Associates.Where(a => a.Id == 0).ToList();
             if (newAssociates.Any())
             {
                 foreach (var item in newAssociates)
                 {
-                    item.Id = 0;
                     item.ObjectionId = updatedItem.Id;
                 }
 
@@ -173,10 +172,10 @@ namespace PWD.Audit.Services
 
             objectionList.CountData = queryableList.Count();
 
-            //queryableList = queryableList
-            //    //.OrderByDescending(o => o.CreationTime)
-            //    .Skip(filterCriteria.Offset)
-            //    .Take(filterCriteria.Limit);
+            queryableList = queryableList
+                //.OrderByDescending(o => o.CreationTime)
+                .Skip(filterCriteria.Offset)
+                .Take(filterCriteria.Limit);
 
             objectionList.ListData = ObjectMapper.Map<IQueryable<Objection>, List<ObjectionDto>>(queryableList);
 
