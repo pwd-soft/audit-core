@@ -32,7 +32,7 @@ namespace PWD.Audit.Services
         public async Task<ObjectionDto> CreateAsync(ObjectionDto objectionInput)
         {
             var objection = ObjectMapper.Map<ObjectionDto, Objection>(objectionInput);
-            var newObjection = await _repository.InsertAsync(objection,true);
+            var newObjection = await _repository.InsertAsync(objection, true);
 
             return ObjectMapper.Map<Objection, ObjectionDto>(newObjection);
         }
@@ -64,34 +64,24 @@ namespace PWD.Audit.Services
             var newAssociates = objectionInput.Associates.Where(a => a.Id == 0).ToList();
             if (newAssociates.Any())
             {
-                foreach (var item in newAssociates)
-                {
-                    item.ObjectionId = updatedItem.Id;
-                }
-
+                newAssociates.ForEach(x=>x.ObjectionId=updatedItem.Id);
                 var newAssociatesEntity = ObjectMapper.Map<List<AssociateDto>, List<Associate>>(newAssociates);
-                if (newAssociatesEntity.Count() > 1)
-                {
-                    await _associateRepository.InsertManyAsync(newAssociatesEntity);
-                }
-                else
-                {
-                    await _associateRepository.InsertAsync(newAssociatesEntity.FirstOrDefault());
-                }
+                await _associateRepository.InsertManyAsync(newAssociatesEntity);
+                //if (newAssociatesEntity.Count() > 1)
+                //    await _associateRepository.InsertManyAsync(newAssociatesEntity);
+                //else
+                //    await _associateRepository.InsertAsync(newAssociatesEntity.FirstOrDefault());
             }
 
             var updateAssociates = objectionInput.Associates.Where(a => a.Id > 0).ToList();
             if (updateAssociates.Any())
             {
                 var updateAssociatesEntity = ObjectMapper.Map<List<AssociateDto>, List<Associate>>(updateAssociates);
-                if (updateAssociatesEntity.Count() > 1)
-                {
-                    await _associateRepository.UpdateManyAsync(updateAssociatesEntity);
-                }
-                else
-                {
-                    await _associateRepository.UpdateAsync(updateAssociatesEntity.FirstOrDefault());
-                }
+                await _associateRepository.UpdateManyAsync(updateAssociatesEntity);
+                //if (updateAssociatesEntity.Count() > 1)
+                //    await _associateRepository.UpdateManyAsync(updateAssociatesEntity);
+                //else
+                //    await _associateRepository.UpdateAsync(updateAssociatesEntity.FirstOrDefault());
             }
 
             return ObjectMapper.Map<Objection, ObjectionDto>(updatedItem);
@@ -138,8 +128,8 @@ namespace PWD.Audit.Services
 
             var objectionList = queryableList.ToList();
 
-            //var objectionList = queryableList.Skip(filterCriteria.Offset)
-            //    .Take(filterCriteria.Limit).ToList();
+            objectionList = queryableList.Skip(filterCriteria.Offset)
+                .Take(filterCriteria.Limit).ToList();
 
             return ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList);
         }

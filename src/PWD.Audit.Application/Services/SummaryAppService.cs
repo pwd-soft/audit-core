@@ -15,12 +15,13 @@ namespace PWD.Audit.Services
         private readonly IRepository<Summary, int> _repository;
         private readonly IRepository<Objection, int> _objectionRepository;
         private readonly IRepository<SummaryLine, int> _SummaryLineRepository;
-
-        public SummaryAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> SummaryLineRepository, IRepository<Objection, int> objectionRepository)
+        private IApprovalAppService _ApprovalAppService;
+        public SummaryAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> SummaryLineRepository, IRepository<Objection, int> objectionRepository, IApprovalAppService approvalAppService)
         {
             _repository = repository;
             _SummaryLineRepository = SummaryLineRepository;
             _objectionRepository = objectionRepository;
+            _ApprovalAppService = approvalAppService;
         }
 
         public async Task<SummaryDto> CreateAsync(SummaryDto SummaryInput)
@@ -101,6 +102,16 @@ namespace PWD.Audit.Services
 
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
 
-       
+        public async Task<List<SummaryDto>> AllOfficeSummary()
+        {
+            var result = new List<SummaryDto>();
+            var offices=await _ApprovalAppService.GetOffices();
+            foreach (var office in offices) { 
+            var summary = await GetByOffice((Guid)office.id);
+                summary.OfficeName = office.displayNameBn;
+                result.Add(summary);
+            }
+            return result;
+        }
     }
 }

@@ -7,6 +7,7 @@ namespace PWD.Audit.DtoModels
     public class SummaryDto : EntityDto<int>
     {
         public Guid OfficeId { get; set; }
+        public string OfficeName { get; set; }
         public DateTime Date { get; set; }
         public string FinancialYear { get; set; }
         public string ReferenceNo { get; set; }
