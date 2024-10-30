@@ -52,9 +52,9 @@
 		<Compile Remove="Controllers\AppUsersController.cs" />
 	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
+	<ItemGroup>
+	  <Folder Include="wwwroot\Uploaded_Documents\" />
+	</ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 

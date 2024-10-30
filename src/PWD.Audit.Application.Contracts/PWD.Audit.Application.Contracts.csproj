@@ -34,8 +34,4 @@
     <ProjectReference Include="..\PWD.Audit.Domain.Shared\PWD.Audit.Domain.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="InputDtos\" />
-  </ItemGroup>
-
 </Project>
