@@ -106,7 +106,24 @@ namespace PWD.Audit.Services
         {
             var result = new List<SummaryDto>();
             var offices=await _ApprovalAppService.GetOffices();
-            foreach (var office in offices) { 
+            offices=offices.Where(o=>o.civilEm!=null).ToList();
+            offices=offices.Where(o=>!o.displayName.Contains("P&D")).ToList();
+            var ol = new List<OrganizationUnitDto>
+            {
+                offices.FirstOrDefault(o => o.layer == "Chief")
+            };
+            offices.Where(o => o.layer == "Zone").ToList().ForEach(z =>
+            {
+                ol.Add(z);
+                var cl = offices.Where(x => x.parentId==z.id).ToList();
+                cl.ForEach(c =>
+                {
+                    ol.Add(c);
+                    var dl = offices.Where(x => x.parentId == c.id).ToList();
+                    ol.AddRange(dl);
+                });
+            });
+            foreach (var office in ol.Where(x => x != null)) { 
             var summary = await GetByOffice((Guid)office.id);
                 summary.OfficeName = office.displayNameBn;
                 result.Add(summary);
