@@ -31,7 +31,7 @@ namespace PWD.Audit
 
             try
             {
-                Log.Information("Starting PWD.Attendance.HttpApi.Host.");
+                Log.Information("Starting PWD.Audit.HttpApi.Host.");
                 CreateHostBuilder(args).Build().Run();
                 return 0;
             }

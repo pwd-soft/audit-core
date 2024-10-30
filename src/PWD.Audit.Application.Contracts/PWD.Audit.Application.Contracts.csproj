@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>PWD.Attendance_Swagger</RootNamespace>
+    <RootNamespace>PWD.Audit</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
