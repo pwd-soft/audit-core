@@ -53,6 +53,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="wwwroot\Temp_Uploads\" />
 	  <Folder Include="wwwroot\Uploaded_Documents\" />
 	</ItemGroup>
 

@@ -10,10 +10,13 @@ using System;
 using PWD.Audit.DtoModels;
 using System.Net.Http.Headers;
 using PWD.Audit.InputDtos;
+using Volo.Abp.AspNetCore.Mvc;
 
 namespace PWD.Audit.Controllers
 {
-    public class FileController : Controller
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class FileController : AbpController
     {
         private readonly IWebHostEnvironment hostEnvironment;
         //private readonly IEmployeeAppService employeeAppService;
@@ -27,6 +30,18 @@ namespace PWD.Audit.Controllers
             this.hostEnvironment = hostEnvironment;
             //this.employeeAppService = employeeAppService;
             //this.nomineeAppService = nomineeAppService;
+        }
+
+        [HttpGet, ActionName("FileInputTest")]
+        public FileInput FileInputTest() 
+        {
+            return new FileInput();
+        }
+
+        [HttpGet, ActionName("FileDataInputTest")]
+        public FileDataInput FileDataInputTest() 
+        {
+            return new FileDataInput();
         }
 
 
@@ -44,13 +59,14 @@ namespace PWD.Audit.Controllers
                     foreach (var file in files)
                     {
                         //var directoryName = Request.Form["directoryName"][0];
-                        //var folderName = Path.Combine("wwwroot", "Uploaded_Documents", directoryName);
+                        //var folderName = Path.Combine("wwwroot", "Temp_Uploads", directoryName);
                         //if (!Directory.Exists(folderName))
                         //{
                         //    DirectoryInfo di = Directory.CreateDirectory(folderName);
                         //}
 
-                        var folderName = Path.Combine("wwwroot", "Uploaded_Documents");
+                        //var folderName = Path.Combine("wwwroot", "Uploaded_Documents");
+                        var folderName = Path.Combine("wwwroot", "Temp_Uploads");
 
                         var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                         var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
