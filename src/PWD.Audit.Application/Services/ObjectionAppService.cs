@@ -15,6 +15,10 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Volo.Abp.ObjectMapping;
 using PWD.Attendance_Swagger.DtoModels;
+using PWD.Audit.InputDtos;
+using System.IO;
+using System.Net.Mail;
+using System.Text.Json;
 
 namespace PWD.Audit.Services
 {
@@ -34,7 +38,45 @@ namespace PWD.Audit.Services
             var objection = ObjectMapper.Map<ObjectionDto, Objection>(objectionInput);
             var newObjection = await _repository.InsertAsync(objection, true);
 
+            if (objectionInput.FileDataInput.Count > 0) 
+            {
+                //await FilePorcessing(newObjection.Id, objectionInput.FileDataInput);
+                objectionInput.FileDataInput = PorcessFilesToUploadFolder(newObjection.Id, objectionInput.FileDataInput);
+            }
+
+            var updateAttachmentField = await _repository.GetAsync(newObjection.Id);
+            updateAttachmentField.Attachments = JsonSerializer.Serialize(objectionInput.FileDataInput);
+            await _repository.UpdateAsync(updateAttachmentField);
+
             return ObjectMapper.Map<Objection, ObjectionDto>(newObjection);
+        }
+
+        private List<FileDataInput> PorcessFilesToUploadFolder(int objectionId, List<FileDataInput> fileDataInput)
+        {
+            var directoryName = objectionId.ToString();
+            var folderName = Path.Combine("wwwroot", "Uploaded_Documents", directoryName);
+            if (!Directory.Exists(folderName))
+            {
+                DirectoryInfo di = Directory.CreateDirectory(folderName);
+            }
+
+            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+
+            foreach (var file in fileDataInput)
+            {
+                var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", file.Path);
+                var destinationPath = Path.Combine(pathToSave, file.FileName);
+
+                System.IO.File.Copy(sourcePath, destinationPath, true);
+                System.IO.File.Delete(sourcePath);
+
+                var path = Path.Combine(folderName, file.Path);
+                path = path.Replace(@"wwwroot\", string.Empty);
+
+                file.Path = path;
+            }
+
+            return fileDataInput;
         }
 
         public async Task<ObjectionDto> UpdateAsync(ObjectionDto objectionInput)

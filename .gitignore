@@ -397,4 +397,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /src/PWD.Audit.HttpApi.Host/wwwroot/Temp_Uploads
-/src/PWD.Audit.HttpApi.Host/wwwroot/Uploaded_Documents/16
+/src/PWD.Audit.HttpApi.Host/wwwroot/Uploaded_Documents

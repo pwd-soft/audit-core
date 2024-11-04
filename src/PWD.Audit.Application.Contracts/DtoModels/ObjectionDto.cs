@@ -1,4 +1,5 @@
 ﻿using PWD.Audit.Enum;
+using PWD.Audit.InputDtos;
 using System;
 using System.Collections.Generic;
 using Volo.Abp.Application.Dtos;
@@ -22,6 +23,7 @@ namespace PWD.Audit.DtoModels
         public string Note { get; set; }
         public string Attachments { get; set; }
         public List<AssociateDto> Associates { get; set; }
+        public List<FileDataInput> FileDataInput { get; set; }
     }
 
 }

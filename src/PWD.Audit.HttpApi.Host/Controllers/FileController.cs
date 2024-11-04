@@ -85,7 +85,7 @@ namespace PWD.Audit.Controllers
                         path = path.Replace(@"wwwroot\", string.Empty);
 
 
-                        attachments.Add(new FileInput { OriginalFileName = fileName, Path = path, FileSize = file.Length, IsFileUploaded = true });
+                        attachments.Add(new FileInput {FileName = uniqueFileName, OriginalFileName = fileName, Path = path, FileSize = file.Length, IsFileUploaded = true });
                     }
 
                     var result = new
