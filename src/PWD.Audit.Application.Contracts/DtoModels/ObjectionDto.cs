@@ -24,6 +24,8 @@ namespace PWD.Audit.DtoModels
         public string Attachments { get; set; }
         public List<AssociateDto> Associates { get; set; }
         public List<FileDataInput> FileDataInput { get; set; }
+        public string MemoNumber { get; set; }
+        public DateTime MemoDate { get; set; }
     }
 
 }

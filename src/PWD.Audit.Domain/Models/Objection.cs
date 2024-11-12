@@ -24,5 +24,7 @@ namespace PWD.Audit.Entities
         public string Note { get; set; }
         public string Attachments { get; set; }
         public List<Associate> Associates { get; set; }
+        public string MemoNumber { get; set; }
+        public DateTime MemoDate { get; set; }
     }
 }

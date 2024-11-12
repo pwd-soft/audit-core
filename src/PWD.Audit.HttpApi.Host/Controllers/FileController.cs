@@ -59,11 +59,13 @@ namespace PWD.Audit.Controllers
                     foreach (var file in files)
                     {
                         //var directoryName = Request.Form["directoryName"][0];
-                        //var folderName = Path.Combine("wwwroot", "Temp_Uploads", directoryName);
-                        //if (!Directory.Exists(folderName))
-                        //{
-                        //    DirectoryInfo di = Directory.CreateDirectory(folderName);
-                        //}
+                        
+                        //Creating temporary folder if not present in wwwroot
+                        var tempFolderName = Path.Combine("wwwroot", "Temp_Uploads");
+                        if (!Directory.Exists(tempFolderName))
+                        {
+                            DirectoryInfo di = Directory.CreateDirectory(tempFolderName);
+                        }
 
                         //var folderName = Path.Combine("wwwroot", "Uploaded_Documents");
                         var folderName = Path.Combine("wwwroot", "Temp_Uploads");

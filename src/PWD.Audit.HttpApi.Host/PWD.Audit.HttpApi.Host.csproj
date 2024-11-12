@@ -40,12 +40,16 @@
   <ItemGroup>
     <Compile Remove="Logs\**" />
     <Compile Remove="wwwroot\libs\**" />
+    <Compile Remove="wwwroot\NewFolder\**" />
     <Content Remove="Logs\**" />
     <Content Remove="wwwroot\libs\**" />
+    <Content Remove="wwwroot\NewFolder\**" />
     <EmbeddedResource Remove="Logs\**" />
     <EmbeddedResource Remove="wwwroot\libs\**" />
+    <EmbeddedResource Remove="wwwroot\NewFolder\**" />
     <None Remove="Logs\**" />
     <None Remove="wwwroot\libs\**" />
+    <None Remove="wwwroot\NewFolder\**" />
   </ItemGroup>
 
 	<ItemGroup>

@@ -69,8 +69,8 @@ namespace PWD.Audit.Services
 
                 System.IO.File.Copy(sourcePath, destinationPath, true);
                 System.IO.File.Delete(sourcePath);
-
-                var path = Path.Combine(folderName, file.Path);
+                var savedFileName = file.Path.Split(@"\")[1];
+                var path = Path.Combine(folderName, savedFileName);
                 path = path.Replace(@"wwwroot\", string.Empty);
 
                 file.Path = path;
