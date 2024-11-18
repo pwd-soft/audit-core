@@ -83,6 +83,8 @@ namespace PWD.Audit.Services
         {
             var dbItem = await _repository.GetAsync(objectionInput.Id);
 
+            //var newFiles = objectionInput.
+
             if (dbItem is not null)
             {
                 //dbItem.Date = objectionInput.Date;
@@ -93,12 +95,12 @@ namespace PWD.Audit.Services
                 dbItem.Description = objectionInput.Description;
                 dbItem.Response = objectionInput.Response;
                 dbItem.Value = objectionInput.Value;
-                dbItem.IsBroadSheet = objectionInput.IsBroadSheet;
-                dbItem.IsResolved = objectionInput.IsResolved;
+                dbItem.ObjectionStatus = objectionInput.ObjectionStatus;
                 dbItem.IsActive = objectionInput.IsActive;
                 dbItem.Note = objectionInput.Note;
                 //dbItem.Attachments = objectionInput.Attachments;
-                //dbItem.< AssociateDto > Associates = objectionInput.< AssociateDto > Associates;
+                dbItem.MemoNumber = objectionInput.MemoNumber;
+                dbItem.MemoDate = objectionInput.MemoDate;
             }
 
             var updatedItem = await _repository.UpdateAsync(dbItem);
@@ -162,11 +164,11 @@ namespace PWD.Audit.Services
             if (!String.IsNullOrEmpty(filterCriteria.FinancialYear))
                 queryableList.Where(o => o.FinancialYear == filterCriteria.FinancialYear);
 
-            if (filterCriteria.IsBroadSheet)
-                queryableList = queryableList.Where(o => o.IsBroadSheet == filterCriteria.IsBroadSheet);
+            //if (filterCriteria.IsBroadSheet)
+            //    queryableList = queryableList.Where(o => o.IsBroadSheet == filterCriteria.IsBroadSheet);
 
-            if (filterCriteria.IsResolved)
-                queryableList = queryableList.Where(o => o.IsResolved == filterCriteria.IsResolved);
+            //if (filterCriteria.IsResolved)
+            //    queryableList = queryableList.Where(o => o.IsResolved == filterCriteria.IsResolved);
 
             var objectionList = queryableList.ToList();
 
@@ -195,11 +197,11 @@ namespace PWD.Audit.Services
             if (!String.IsNullOrEmpty(filterCriteria.FinancialYear))
                 queryableList.Where(o => o.FinancialYear == filterCriteria.FinancialYear);
 
-            if (filterCriteria.IsBroadSheet)
-                queryableList = queryableList.Where(o => o.IsBroadSheet == filterCriteria.IsBroadSheet);
+            //if (filterCriteria.IsBroadSheet)
+            //    queryableList = queryableList.Where(o => o.IsBroadSheet == filterCriteria.IsBroadSheet);
 
-            if (filterCriteria.IsResolved)
-                queryableList = queryableList.Where(o => o.IsResolved == filterCriteria.IsResolved);
+            //if (filterCriteria.IsResolved)
+            //    queryableList = queryableList.Where(o => o.IsResolved == filterCriteria.IsResolved);
 
 
             objectionList.CountData = queryableList.Count();
