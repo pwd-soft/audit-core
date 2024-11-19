@@ -40,8 +40,7 @@ namespace PWD.Audit.Services
 
             if (objectionInput.FileDataInput.Count > 0) 
             {
-                //await FilePorcessing(newObjection.Id, objectionInput.FileDataInput);
-                objectionInput.FileDataInput = PorcessFilesToUploadFolder(newObjection.Id, objectionInput.FileDataInput);
+                objectionInput.FileDataInput = ProcessAttachments(newObjection.Id, objectionInput.FileDataInput, objectionInput.Attachments);
             }
 
             var updateAttachmentField = await _repository.GetAsync(newObjection.Id);
@@ -49,6 +48,35 @@ namespace PWD.Audit.Services
             await _repository.UpdateAsync(updateAttachmentField);
 
             return ObjectMapper.Map<Objection, ObjectionDto>(newObjection);
+        }
+
+        private List<FileDataInput> ProcessAttachments(int objectionId, List<FileDataInput> fileDataInput, string attachments)
+        {
+            var existingAttachments = new List<FileDataInput>();
+
+            //Processing proper image path
+            fileDataInput = PorcessFilesToUploadFolder(objectionId, fileDataInput);
+
+            if (attachments is not null)
+            {
+                existingAttachments = JsonSerializer.Deserialize<FileDataInput[]>(attachments).ToList();
+            }
+
+            //Assigning id to every attachment by generating random numbers between 1100-2000 and checking,
+            //if the id exists generate new id; then assign the id
+            foreach (var file in fileDataInput)
+            {
+                Random rnd = new Random();
+                int newId = rnd.Next(1100, 2000);
+                while (existingAttachments.Exists(f => f.Id == newId))
+                {
+                    newId = rnd.Next(1100, 2000);
+                }
+                file.Id = newId;
+                existingAttachments.Add(file);
+            }
+
+            return existingAttachments;
         }
 
         private List<FileDataInput> PorcessFilesToUploadFolder(int objectionId, List<FileDataInput> fileDataInput)
@@ -98,37 +126,38 @@ namespace PWD.Audit.Services
                 dbItem.ObjectionStatus = objectionInput.ObjectionStatus;
                 dbItem.IsActive = objectionInput.IsActive;
                 dbItem.Note = objectionInput.Note;
-                //dbItem.Attachments = objectionInput.Attachments;
                 dbItem.MemoNumber = objectionInput.MemoNumber;
                 dbItem.MemoDate = objectionInput.MemoDate;
+
+                if (objectionInput.FileDataInput.Count > 0)
+                {
+                    objectionInput.FileDataInput = ProcessAttachments(dbItem.Id, objectionInput.FileDataInput, dbItem.Attachments);
+                    dbItem.Attachments = JsonSerializer.Serialize(objectionInput.FileDataInput);
+                }
             }
 
             var updatedItem = await _repository.UpdateAsync(dbItem);
 
-            var newAssociates = objectionInput.Associates.Where(a => a.Id == 0).ToList();
-            if (newAssociates.Any())
+            if (objectionInput?.Associates?.Count > 0)
             {
-                newAssociates.ForEach(x=>x.ObjectionId=updatedItem.Id);
-                var newAssociatesEntity = ObjectMapper.Map<List<AssociateDto>, List<Associate>>(newAssociates);
-                await _associateRepository.InsertManyAsync(newAssociatesEntity);
-                //if (newAssociatesEntity.Count() > 1)
-                //    await _associateRepository.InsertManyAsync(newAssociatesEntity);
-                //else
-                //    await _associateRepository.InsertAsync(newAssociatesEntity.FirstOrDefault());
-            }
+                var newAssociates = objectionInput.Associates.Where(a => a.Id == 0).ToList();
+                if (newAssociates.Any())
+                {
+                    newAssociates.ForEach(x => x.ObjectionId = updatedItem.Id);
+                    var newAssociatesEntity = ObjectMapper.Map<List<AssociateDto>, List<Associate>>(newAssociates);
+                    await _associateRepository.InsertManyAsync(newAssociatesEntity);
+                }
 
-            var updateAssociates = objectionInput.Associates.Where(a => a.Id > 0).ToList();
-            if (updateAssociates.Any())
-            {
-                var updateAssociatesEntity = ObjectMapper.Map<List<AssociateDto>, List<Associate>>(updateAssociates);
-                await _associateRepository.UpdateManyAsync(updateAssociatesEntity);
-                //if (updateAssociatesEntity.Count() > 1)
-                //    await _associateRepository.UpdateManyAsync(updateAssociatesEntity);
-                //else
-                //    await _associateRepository.UpdateAsync(updateAssociatesEntity.FirstOrDefault());
+                var updateAssociates = objectionInput.Associates.Where(a => a.Id > 0).ToList();
+                if (updateAssociates.Any())
+                {
+                    var updateAssociatesEntity = ObjectMapper.Map<List<AssociateDto>, List<Associate>>(updateAssociates);
+                    await _associateRepository.UpdateManyAsync(updateAssociatesEntity);
+                }
             }
 
             return ObjectMapper.Map<Objection, ObjectionDto>(updatedItem);
+            //return ObjectMapper.Map<Objection, ObjectionDto>(new Objection());
         }
 
         public async Task<ObjectionDto> GetByIdAsync(int id)
