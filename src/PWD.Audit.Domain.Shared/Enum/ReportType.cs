@@ -8,8 +8,5 @@ namespace PWD.Audit.Enum
     {
         All,
         Resolved,
-        SFI,
-        NonSFI,
-        Draft
     }
 }

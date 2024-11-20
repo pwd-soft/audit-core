@@ -1,4 +1,5 @@
-﻿using PWD.Audit.DtoModels;
+﻿using PWD.Attendance_Swagger.DtoModels;
+using PWD.Audit.DtoModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,6 +9,6 @@ namespace PWD.Audit.Interfaces
 {
     public interface IReportAppService
     {
-        Task<List<SummaryDto>> SummaryReport(ReportFilterModel reportFilter);
+        Task<GenericListDto<SummaryDto>> SummaryReport(ReportFilterModel reportFilter);
     }
 }
