@@ -38,7 +38,7 @@ namespace PWD.Audit.Services
             var objection = ObjectMapper.Map<ObjectionDto, Objection>(objectionInput);
             var newObjection = await _repository.InsertAsync(objection, true);
 
-            if (objectionInput.FileDataInput.Count > 0) 
+            if (objectionInput.FileDataInput?.Count > 0) 
             {
                 objectionInput.FileDataInput = ProcessAttachments(newObjection.Id, objectionInput.FileDataInput, objectionInput.Attachments);
             }
@@ -129,7 +129,7 @@ namespace PWD.Audit.Services
                 dbItem.MemoNumber = objectionInput.MemoNumber;
                 dbItem.MemoDate = objectionInput.MemoDate;
 
-                if (objectionInput.FileDataInput.Count > 0)
+                if (objectionInput.FileDataInput?.Count > 0)
                 {
                     objectionInput.FileDataInput = ProcessAttachments(dbItem.Id, objectionInput.FileDataInput, dbItem.Attachments);
                     dbItem.Attachments = JsonSerializer.Serialize(objectionInput.FileDataInput);
@@ -226,8 +226,8 @@ namespace PWD.Audit.Services
             if (!String.IsNullOrEmpty(filterCriteria.FinancialYear))
                 queryableList.Where(o => o.FinancialYear == filterCriteria.FinancialYear);
 
-            //if (filterCriteria.IsBroadSheet)
-            //    queryableList = queryableList.Where(o => o.IsBroadSheet == filterCriteria.IsBroadSheet);
+            if (filterCriteria.ObjectionStatus != ObjectionStatus.None)
+                queryableList = queryableList.Where(o => o.ObjectionStatus == filterCriteria.ObjectionStatus);
 
             //if (filterCriteria.IsResolved)
             //    queryableList = queryableList.Where(o => o.IsResolved == filterCriteria.IsResolved);

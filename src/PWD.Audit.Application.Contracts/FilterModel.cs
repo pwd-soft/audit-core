@@ -23,8 +23,7 @@ namespace PWD.Audit
         public string? FinancialYear { get; set; }
         public ObjectionType? ObjectionType { get; set; }
         public DirectorateType? DirectorateType { get; set; }
-        public bool IsBroadSheet { get; set; } = false;
-        public bool IsResolved { get; set; } = false;
+        public ObjectionStatus? ObjectionStatus { get; set; }
         //public bool IsActive { get; set; } = true;
         //public DateTime Date { get; set; }
         //public string Name { get; set; }

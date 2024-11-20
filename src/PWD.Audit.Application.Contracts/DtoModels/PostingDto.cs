@@ -49,6 +49,7 @@ namespace PWD.Audit.DtoModels
         public string type { get; set; }
         public virtual List<OrgRoleConsumeDto> roles { get; set; }
         public virtual List<string> roleNames { get; set; } = new List<string>();
+        public virtual int sequence { get; set; }
 
     }
     public class ColleagueDto 
