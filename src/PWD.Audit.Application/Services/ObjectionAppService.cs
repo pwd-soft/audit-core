@@ -168,8 +168,7 @@ namespace PWD.Audit.Services
         }
 
         public async Task<List<ObjectionDto>> GetListAsync() => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
-
-        //to be removed, work with FilterObjections
+                
         public async Task<List<ObjectionDto>> GetListByOfficeIdAsync(Guid officeId)
         {
             var objectionList = await _repository.GetListAsync(i => i.OfficeId == officeId);

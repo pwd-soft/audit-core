@@ -9,6 +9,6 @@ namespace PWD.Audit.Interfaces
 {
     public interface IReportAppService
     {
-        Task<GenericListDto<SummaryDto>> SummaryReport(ReportFilterModel reportFilter);
+        Task<GenericListDto<ObjectionReportDto>> DetailedReport(ReportFilterModel reportFilter);
     }
 }
