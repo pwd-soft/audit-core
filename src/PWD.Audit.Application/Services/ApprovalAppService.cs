@@ -596,6 +596,47 @@ namespace PWD.Audit.Services
             return false;
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<List<string>> GetUsersByRole(string roleName)
+        {
+            using (var client = new HttpClient())
+            {
+                var tokenResponse = await GetToken();
+                client.BaseAddress = new Uri(clientUrl);
+                client.SetBearerToken(tokenResponse.AccessToken);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                //GET Method /api/app/account/role-users
+
+                var role = JsonSerializer.Serialize(roleName);
+                var requestContent = new StringContent(roleName, Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response =
+                    await client.PostAsync(($"api/app/account/role-users?name="), requestContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        var postString = await response.Content.ReadAsStringAsync();
+                        var posts = JsonSerializer.Deserialize<List<string>>(postString);
+
+                        return posts;
+                        // put the code here that may raise exceptions
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Internal server Error");
+                }
+            }
+            return new List<string>();
+        }
 
     }
 
