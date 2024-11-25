@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Auditing;
 using Volo.Abp.Domain.Repositories;
@@ -608,12 +609,11 @@ namespace PWD.Audit.Services
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 //GET Method /api/app/account/role-users
-
                 var role = JsonSerializer.Serialize(roleName);
-                var requestContent = new StringContent(roleName, Encoding.UTF8, "application/json");
+                var requestContent = new StringContent(role, Encoding.UTF8, "application/json");
 
                 HttpResponseMessage response =
-                    await client.PostAsync(($"api/app/account/role-users?name="), requestContent);
+                    await client.PostAsync(($"api/app/account/role-users?name={roleName}"), requestContent);
 
                 if (response.IsSuccessStatusCode)
                 {
