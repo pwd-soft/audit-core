@@ -45,7 +45,7 @@ namespace PWD.Audit.Services
             if (reportFilter.Offices?.Count > 0)
             {
                 //var test = offices.Where(x => reportFilter.Offices.Contains((Guid)x.id)).ToList();
-                offices = offices.Where(x => reportFilter.Offices.Contains((Guid)x.id)).ToList();
+                finalOfficeList = offices.Where(x => reportFilter.Offices.Contains((Guid)x.id)).ToList();
             }
             else
             {
