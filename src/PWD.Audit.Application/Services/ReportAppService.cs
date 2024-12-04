@@ -39,34 +39,35 @@ namespace PWD.Audit.Services
             List<OrganizationUnitDto> finalOfficeList = new List<OrganizationUnitDto>();
 
             var offices = await _approvalAppService.GetOffices();
-            offices = offices.Where(o => o.civilEm != null).ToList();
-            offices = offices.Where(o => !o.displayName.Contains("P&D")).ToList();
+            var auditees = await _approvalAppService.GetUserByRole("AuditOfficeAdmin");
+
+            offices = offices.Where(x => auditees.Contains(x.code)).ToList();
 
             if (reportFilter.Offices?.Count > 0)
             {
-                //var test = offices.Where(x => reportFilter.Offices.Contains((Guid)x.id)).ToList();
                 finalOfficeList = offices.Where(x => reportFilter.Offices.Contains((Guid)x.id)).ToList();
             }
             else
             {
-                var ol = new List<OrganizationUnitDto>
-                {
-                    offices.FirstOrDefault(o => o.layer == "Chief")
-                };
+                //var ol = new List<OrganizationUnitDto>
+                //{
+                //    offices.FirstOrDefault(o => o.layer == "Chief")
+                //};
 
-                offices.Where(o => o.layer == "Zone").ToList().ForEach(z =>
-                {
-                    ol.Add(z);
-                    var cl = offices.Where(x => x.parentId == z.id).ToList();
-                    cl.ForEach(c =>
-                    {
-                        ol.Add(c);
-                        var dl = offices.Where(x => x.parentId == c.id).ToList();
-                        ol.AddRange(dl);
-                    });
-                });
-                finalOfficeList = ol;
-                finalOfficeList = finalOfficeList.Where(x => x != null).ToList();
+                //offices.Where(o => o.layer == "Zone").ToList().ForEach(z =>
+                //{
+                //    ol.Add(z);
+                //    var cl = offices.Where(x => x.parentId == z.id).ToList();
+                //    cl.ForEach(c =>
+                //    {
+                //        ol.Add(c);
+                //        var dl = offices.Where(x => x.parentId == c.id).ToList();
+                //        ol.AddRange(dl);
+                //    });
+                //});
+                //finalOfficeList = ol;
+                //finalOfficeList = finalOfficeList.Where(x => x != null).ToList();
+                finalOfficeList = offices;
             }
 
             foreach (var office in finalOfficeList) 
@@ -76,14 +77,6 @@ namespace PWD.Audit.Services
                 objectionReport.Objections = await GetObjectionsByOffice((Guid)office.id, reportFilter);
                 processedObjections.Add(objectionReport);
             }
-
-
-            //foreach (var office in finalOfficeList)
-            //{
-            //    var summary = await GetSummaryByOffice((Guid)office.id, reportFilter);
-            //    summary.OfficeName = office.displayNameBn;
-            //    processedSummaries.Add(summary);
-            //}
 
             result.CountData = processedObjections.Count();
             processedObjections = processedObjections.AsEnumerable()

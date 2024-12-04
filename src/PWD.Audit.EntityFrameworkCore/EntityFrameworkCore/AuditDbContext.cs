@@ -31,6 +31,7 @@ namespace PWD.Audit.EntityFrameworkCore
         public DbSet<Summary> Summaries { get; set; }
         public DbSet<SummaryLine> SummaryLines { get; set; }
         public DbSet<Posting> Postings { get; set; }
+        public DbSet<YearlyObjection> YearlyObjections { get; set; }
 
         public AuditDbContext(DbContextOptions<AuditDbContext> options)
             : base(options)

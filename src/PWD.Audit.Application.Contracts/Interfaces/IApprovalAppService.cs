@@ -11,6 +11,7 @@ namespace PWD.Audit.Interfaces
 
         Task<DateTime> LatestOffice();
         Task<List<OrganizationUnitDto>> GetOffices();
+        Task<List<string>> GetUserByRole(string roleName);
         Task<UserInfo> GetUserInfo(string userName);
         Task<UserInfo> GetUserInfoById(string userId);
         Task<PostingDto> GetPostingById(int id);

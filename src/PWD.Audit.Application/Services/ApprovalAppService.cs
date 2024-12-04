@@ -599,7 +599,7 @@ namespace PWD.Audit.Services
 
         [AllowAnonymous]
         [HttpGet]
-        public async Task<List<string>> GetUsersByRole(string roleName)
+        public async Task<List<string>> GetUserByRole(string roleName)
         {
             using (var client = new HttpClient())
             {
@@ -637,7 +637,6 @@ namespace PWD.Audit.Services
             }
             return new List<string>();
         }
-
     }
 
 
