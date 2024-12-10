@@ -19,6 +19,7 @@ using PWD.Audit.InputDtos;
 using System.IO;
 using System.Net.Mail;
 using System.Text.Json;
+using PWD.Audit.Models;
 
 namespace PWD.Audit.Services
 {
@@ -26,11 +27,13 @@ namespace PWD.Audit.Services
     {
         private readonly IRepository<Objection, int> _repository;
         private readonly IRepository<Associate, int> _associateRepository;
+        private IApprovalAppService _approvalAppService;
 
-        public ObjectionAppService(IRepository<Objection, int> repository, IRepository<Associate, int> associateRepository)
+        public ObjectionAppService(IRepository<Objection, int> repository, IRepository<Associate, int> associateRepository, IApprovalAppService approvalAppService)
         {
             _repository = repository;
             _associateRepository = associateRepository;
+            _approvalAppService = approvalAppService;
         }
 
         public async Task<ObjectionDto> CreateAsync(ObjectionDto objectionInput)
@@ -38,7 +41,7 @@ namespace PWD.Audit.Services
             var objection = ObjectMapper.Map<ObjectionDto, Objection>(objectionInput);
             var newObjection = await _repository.InsertAsync(objection, true);
 
-            if (objectionInput.FileDataInput?.Count > 0) 
+            if (objectionInput.FileDataInput?.Count > 0)
             {
                 objectionInput.FileDataInput = ProcessAttachments(newObjection.Id, objectionInput.FileDataInput, objectionInput.Attachments);
             }
@@ -168,7 +171,7 @@ namespace PWD.Audit.Services
         }
 
         public async Task<List<ObjectionDto>> GetListAsync() => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
-                
+
         public async Task<List<ObjectionDto>> GetListByOfficeIdAsync(Guid officeId)
         {
             var objectionList = await _repository.GetListAsync(i => i.OfficeId == officeId);
@@ -247,5 +250,6 @@ namespace PWD.Audit.Services
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
 
         //private async Task<List<ObjectionDto>> AllData () => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
+
     }
 }
