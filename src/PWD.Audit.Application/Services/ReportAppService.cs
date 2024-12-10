@@ -22,6 +22,8 @@ namespace PWD.Audit.Services
         private readonly IRepository<SummaryLine, int> _summaryLineRepository;
         private IApprovalAppService _approvalAppService;
 
+        private const string AuditMonitoringOfficeRole = "AuditOfficeAdmin";
+
         public ReportAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> summaryLineRepository, IRepository<Objection, int> objectionRepository, IObjectionAppService objectionService, IApprovalAppService approvalAppService)
         {
             _repository = repository;
@@ -39,7 +41,7 @@ namespace PWD.Audit.Services
             List<OrganizationUnitDto> finalOfficeList = new List<OrganizationUnitDto>();
 
             var offices = await _approvalAppService.GetOffices();
-            var auditees = await _approvalAppService.GetUserByRole("AuditOfficeAdmin");
+            var auditees = await _approvalAppService.GetUserByRole(AuditMonitoringOfficeRole);
 
             offices = offices.Where(x => auditees.Contains(x.code)).ToList();
 

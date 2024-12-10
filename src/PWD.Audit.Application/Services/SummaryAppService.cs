@@ -15,14 +15,16 @@ namespace PWD.Audit.Services
     {
         private readonly IRepository<Summary, int> _repository;
         private readonly IRepository<Objection, int> _objectionRepository;
-        private readonly IRepository<SummaryLine, int> _SummaryLineRepository;
-        private IApprovalAppService _ApprovalAppService;
+        private readonly IRepository<SummaryLine, int> _summaryLineRepository;
+        private IApprovalAppService _approvalAppService;
+
+        private const string AuditMonitoringOfficeRole = "AuditOfficeAdmin";
         public SummaryAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> SummaryLineRepository, IRepository<Objection, int> objectionRepository, IApprovalAppService approvalAppService)
         {
             _repository = repository;
-            _SummaryLineRepository = SummaryLineRepository;
+            _summaryLineRepository = SummaryLineRepository;
             _objectionRepository = objectionRepository;
-            _ApprovalAppService = approvalAppService;
+            _approvalAppService = approvalAppService;
         }
 
         public async Task<SummaryDto> CreateAsync(SummaryDto SummaryInput)
@@ -43,6 +45,39 @@ namespace PWD.Audit.Services
 
             var updatedItem = await _repository.UpdateAsync(dbItem);
             return ObjectMapper.Map<Summary, SummaryDto>(updatedItem);
+        }
+
+        public async Task<List<SummaryDto>> AllOfficeSummary()
+        {
+            var result = new List<SummaryDto>();
+            var offices = await _approvalAppService.GetOffices();
+            //offices = offices.Where(o => o.civilEm != null).ToList();
+            //offices = offices.Where(o => !o.displayName.Contains("P&D")).ToList();
+
+            var auditees = await _approvalAppService.GetUserByRole(AuditMonitoringOfficeRole);
+            offices = offices.Where(x => auditees.Contains(x.code)).ToList();
+            var ol = new List<OrganizationUnitDto>
+            {
+                offices.FirstOrDefault(o => o.layer == "Chief")
+            };
+            offices.Where(o => o.layer == "Zone").ToList().ForEach(z =>
+            {
+                ol.Add(z);
+                var cl = offices.Where(x => x.parentId == z.id).ToList();
+                cl.ForEach(c =>
+                {
+                    ol.Add(c);
+                    var dl = offices.Where(x => x.parentId == c.id).ToList();
+                    ol.AddRange(dl);
+                });
+            });
+            foreach (var office in ol.Where(x => x != null))
+            {
+                var summary = await GetByOffice((Guid)office.id);
+                summary.OfficeName = office.displayNameBn;
+                result.Add(summary);
+            }
+            return result;
         }
 
         public async Task<SummaryDto> GetByOffice(Guid officeId)
@@ -102,34 +137,5 @@ namespace PWD.Audit.Services
         public async Task<List<SummaryDto>> GetListAsync() => ObjectMapper.Map<List<Summary>, List<SummaryDto>>(await _repository.GetListAsync());
 
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
-
-        public async Task<List<SummaryDto>> AllOfficeSummary()
-        {
-            var result = new List<SummaryDto>();
-            var offices=await _ApprovalAppService.GetOffices();
-            offices=offices.Where(o=>o.civilEm!=null).ToList();
-            offices=offices.Where(o=>!o.displayName.Contains("P&D")).ToList();
-            var ol = new List<OrganizationUnitDto>
-            {
-                offices.FirstOrDefault(o => o.layer == "Chief")
-            };
-            offices.Where(o => o.layer == "Zone").ToList().ForEach(z =>
-            {
-                ol.Add(z);
-                var cl = offices.Where(x => x.parentId==z.id).ToList();
-                cl.ForEach(c =>
-                {
-                    ol.Add(c);
-                    var dl = offices.Where(x => x.parentId == c.id).ToList();
-                    ol.AddRange(dl);
-                });
-            });
-            foreach (var office in ol.Where(x => x != null)) { 
-            var summary = await GetByOffice((Guid)office.id);
-                summary.OfficeName = office.displayNameBn;
-                result.Add(summary);
-            }
-            return result;
-        }
     }
 }
