@@ -27,13 +27,11 @@ namespace PWD.Audit.Services
     {
         private readonly IRepository<Objection, int> _repository;
         private readonly IRepository<Associate, int> _associateRepository;
-        private IApprovalAppService _approvalAppService;
 
-        public ObjectionAppService(IRepository<Objection, int> repository, IRepository<Associate, int> associateRepository, IApprovalAppService approvalAppService)
+        public ObjectionAppService(IRepository<Objection, int> repository, IRepository<Associate, int> associateRepository)
         {
             _repository = repository;
             _associateRepository = associateRepository;
-            _approvalAppService = approvalAppService;
         }
 
         public async Task<ObjectionDto> CreateAsync(ObjectionDto objectionInput)
