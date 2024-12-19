@@ -27,6 +27,7 @@ namespace PWD.Audit.DtoModels
         public List<FileDataInput> FileDataInput { get; set; }
         public string MemoNumber { get; set; }
         public DateTime MemoDate { get; set; }
+        public int AnswerCount { get; set; } = 0;
     }
 
 }

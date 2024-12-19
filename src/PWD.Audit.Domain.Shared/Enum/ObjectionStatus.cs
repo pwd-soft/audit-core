@@ -9,6 +9,8 @@ namespace PWD.Audit.Enum
         None,
         BroadSheetNotAnswered,
         BroadSheetAnswered,
+        RequestedReAnswer,
+        ReAnswered,
         Resolved
     }
 }

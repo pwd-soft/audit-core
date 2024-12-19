@@ -27,5 +27,6 @@ namespace PWD.Audit.Entities
         public List<Associate> Associates { get; set; }
         public string MemoNumber { get; set; }
         public DateTime MemoDate { get; set; }
+        public int AnswerCount { get; set; } = 0;
     }
 }
