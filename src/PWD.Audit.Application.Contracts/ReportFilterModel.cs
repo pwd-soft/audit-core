@@ -12,6 +12,6 @@ namespace PWD.Audit
         public ObjectionType ObjectionType { get; set; } = ObjectionType.None;
         public ObjectionStatus ObjectionStatus { get; set; } = ObjectionStatus.None;
         public List<Guid> Offices { get; set; }
-        public string FinancialYear { get; set; } = string.Empty;
+        public int FinancialYear { get; set; } = 0;
     }
 }

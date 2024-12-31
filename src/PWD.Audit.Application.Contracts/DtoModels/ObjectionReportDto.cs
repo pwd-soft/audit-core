@@ -8,5 +8,6 @@ namespace PWD.Audit.DtoModels
     {
         public OrganizationUnitDto OrgUnit { get; set; }
         public List<ObjectionDto> Objections { get; set; }
+        public int yearlyObjections { get; set; }
     }
 }

@@ -28,6 +28,7 @@ namespace PWD.Audit.DtoModels
         public string MemoNumber { get; set; }
         public DateTime MemoDate { get; set; }
         public int AnswerCount { get; set; } = 0;
+        public bool IsIncomplete {  get; set; } = false;
     }
 
 }
