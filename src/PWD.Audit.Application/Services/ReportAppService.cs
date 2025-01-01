@@ -75,14 +75,16 @@ namespace PWD.Audit.Services
         {
             var validObjections = new List<ObjectionDto>();
             var objections = await _objectionService.GetListByOfficeIdAsync(officeId);
+            if(!objections.Any()) return validObjections;
             var yearlyObjections = await _yearlyObjectionAppService.GetListByOfficeIdAsync(officeId);
             bool flag = false;
             var yearlySum = yearlyObjections.Sum(x => x.NumberOfObjections);
 
             if (reportFilter.FinancialYear > 0)
             {
-                yearlySum = yearlyObjections
-                    .FirstOrDefault(x => x.Year == reportFilter.FinancialYear).NumberOfObjections;
+                var obj = yearlyObjections
+                    .FirstOrDefault(x => x.Year == reportFilter.FinancialYear);
+                yearlySum = obj is not null ? obj.NumberOfObjections : 0;
                 objections = objections.Where(x => x.Date.Year == reportFilter.FinancialYear).ToList();
             }
 
