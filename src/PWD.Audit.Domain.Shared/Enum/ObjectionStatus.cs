@@ -11,6 +11,7 @@ namespace PWD.Audit.Enum
         BroadSheetAnswered,
         RequestedReAnswer,
         ReAnswered,
-        Resolved
+        Resolved,
+        Other
     }
 }
