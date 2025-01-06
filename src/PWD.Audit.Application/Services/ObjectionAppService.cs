@@ -224,9 +224,9 @@ namespace PWD.Audit.Services
                 queryableList = queryableList.Where(o => o.ObjectionType == filterCriteria.ObjectionType);
 
             if (!String.IsNullOrEmpty(filterCriteria.FinancialYear))
-                queryableList.Where(o => o.FinancialYear == filterCriteria.FinancialYear);
+                queryableList = queryableList.Where(o => o.FinancialYear == filterCriteria.FinancialYear);
 
-            if (filterCriteria.ObjectionStatus != ObjectionStatus.None)
+            if (filterCriteria.ObjectionStatus > 0)
                 queryableList = queryableList.Where(o => o.ObjectionStatus == filterCriteria.ObjectionStatus);
 
             //if (filterCriteria.IsResolved)
