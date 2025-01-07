@@ -10,6 +10,7 @@ namespace PWD.Audit.DtoModels
         public string Designation { get; set; }
         public string Post { get; set; }
         public string Note { get; set; }
+        public string BCSID { get; set; }
     }
 
 }
