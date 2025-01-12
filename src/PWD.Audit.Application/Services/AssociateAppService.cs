@@ -26,11 +26,11 @@ namespace PWD.Audit.Services
         {
             var associates = await _repository.GetQueryableAsync();
 
-            if (!String.IsNullOrEmpty(associateFilter.Name))
-                associates = associates.Where(x => x.Name.Contains(associateFilter.Name));
+            if (!String.IsNullOrEmpty(associateFilter.Name.Trim()))
+                associates = associates.Where(x => x.Name.Contains(associateFilter.Name.Trim()));
             
-            if (!String.IsNullOrEmpty(associateFilter.BCSID))
-                associates = associates.Where(x => x.BCSID == associateFilter.BCSID);
+            if (!String.IsNullOrEmpty(associateFilter.BCSID.Trim()))
+                associates = associates.Where(x => x.BCSID == associateFilter.BCSID.Trim());
 
             return ObjectMapper.Map<IQueryable<Associate>, List<AssociateDto>>(associates);
         }
