@@ -8,6 +8,6 @@ namespace PWD.Audit.Interfaces
 {
     public interface IAssociateAppService
     {
-        Task<List<AssociateDto>> SearchAssociates(AssociateFilter associateFilter);
+        Task<List<AssociateAndObjectionsDto>> SearchAssociates(AssociateFilter associateFilter);
     }
 }
