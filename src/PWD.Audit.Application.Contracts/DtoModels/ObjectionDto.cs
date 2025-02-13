@@ -31,6 +31,7 @@ namespace PWD.Audit.DtoModels
         public string Comments { get; set; } = string.Empty;
         public string ArticleNumber { get; set; } = string.Empty;
         public bool IsIncomplete {  get; set; } = false;
+        public List<ResponseHistoryDto> ResponseHistories { get; set; }
     }
 
 }

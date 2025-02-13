@@ -1,5 +1,6 @@
 ﻿
 using PWD.Audit.Enum;
+using PWD.Audit.Models;
 using System;
 using System.Collections.Generic;
 using Volo.Abp.Domain.Entities.Auditing;
@@ -30,5 +31,7 @@ namespace PWD.Audit.Entities
         public int AnswerCount { get; set; } = 0;
         public string Comments { get; set; } = string.Empty;
         public string ArticleNumber { get; set; } = string.Empty;
+
+        public List<ResponseHistory> ResponseHistory { get; set; }
     }
 }

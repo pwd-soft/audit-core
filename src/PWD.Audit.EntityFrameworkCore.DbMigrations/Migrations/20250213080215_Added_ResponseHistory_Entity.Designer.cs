@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PWD.Audit.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -10,9 +11,10 @@ using Volo.Abp.EntityFrameworkCore;
 namespace PWD.Audit.Migrations
 {
     [DbContext(typeof(AuditMigrationsDbContext))]
-    partial class AttendanceMigrationsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250213080215_Added_ResponseHistory_Entity")]
+    partial class Added_ResponseHistory_Entity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -397,15 +399,6 @@ namespace PWD.Audit.Migrations
 
                     b.Property<Guid?>("LastModifierId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("LockStatus")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MonitorComment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MonitorUsername")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ObjectionId")
                         .HasColumnType("int");

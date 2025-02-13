@@ -163,7 +163,7 @@ namespace PWD.Audit.Services
 
         public async Task<ObjectionDto> GetByIdAsync(int id)
         {
-            var objectionWithDetails = await _repository.WithDetailsAsync(o => o.Associates);
+            var objectionWithDetails = await _repository.WithDetailsAsync(o => o.Associates, r=>r.ResponseHistory);
             var objection = objectionWithDetails.FirstOrDefault(o => o.Id == id);
             return ObjectMapper.Map<Objection, ObjectionDto>(objection);
         }
