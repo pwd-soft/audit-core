@@ -11,6 +11,7 @@ namespace PWD.Audit.Models
     public class ResponseHistory : FullAuditedEntity<int>
     {
         public int ObjectionId { get; set; }
+        public Guid OfficeId { get; set; }
         public ObjectionStatus ObjectionStatus { get; set; } = ObjectionStatus.None;
         public string Response { get; set; } = string.Empty;
         public string MonitorComment { get; set; } = string.Empty;
