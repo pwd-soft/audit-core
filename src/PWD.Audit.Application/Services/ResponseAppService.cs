@@ -52,6 +52,11 @@ namespace PWD.Audit.Services
             var responseWithDetails = await repository.GetListAsync(r => r.OfficeId == officeId);
             return ObjectMapper.Map<List<ResponseHistory>, List<ResponseHistoryDto>>(responseWithDetails);
         }
+        public async Task<List<ResponseHistoryDto>> GetListByObjectionIdAsync(int objecvtionId)
+        {
+            var responseWithDetails = await repository.GetListAsync(r => r.ObjectionId == objecvtionId);
+            return ObjectMapper.Map<List<ResponseHistory>, List<ResponseHistoryDto>>(responseWithDetails);
+        }
 
         public Task<ResponseHistoryDto> UpdateAsync(ResponseHistoryDto input)
         {
