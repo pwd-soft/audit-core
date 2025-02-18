@@ -56,22 +56,22 @@ namespace PWD.Audit.Services
 
             var auditees = await _approvalAppService.GetUserByRole(AuditMonitoringOfficeRole);
             offices = offices.Where(x => auditees.Contains(x.code)).ToList();
-            var ol = new List<OrganizationUnitDto>
-            {
-                offices.FirstOrDefault(o => o.layer == "Chief")
-            };
-            offices.Where(o => o.layer == "Zone").ToList().ForEach(z =>
-            {
-                ol.Add(z);
-                var cl = offices.Where(x => x.parentId == z.id).ToList();
-                cl.ForEach(c =>
-                {
-                    ol.Add(c);
-                    var dl = offices.Where(x => x.parentId == c.id).ToList();
-                    ol.AddRange(dl);
-                });
-            });
-            foreach (var office in ol.Where(x => x != null))
+            //var ol = new List<OrganizationUnitDto>
+            //{
+            //    offices.FirstOrDefault(o => o.layer == "Chief")
+            //};
+            //offices.Where(o => o.layer == "Zone").ToList().ForEach(z =>
+            //{
+            //    ol.Add(z);
+            //    var cl = offices.Where(x => x.parentId == z.id).ToList();
+            //    cl.ForEach(c =>
+            //    {
+            //        ol.Add(c);
+            //        var dl = offices.Where(x => x.parentId == c.id).ToList();
+            //        ol.AddRange(dl);
+            //    });
+            //});
+            foreach (var office in offices.Where(x => x != null))
             {
                 var summary = await GetByOffice((Guid)office.id);
                 summary.OfficeName = office.displayNameBn;
