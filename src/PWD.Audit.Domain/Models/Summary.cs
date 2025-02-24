@@ -8,6 +8,7 @@ namespace PWD.Audit.Entities
     public class Summary : FullAuditedEntity<int>
     {
         public Guid OfficeId { get; set; }
+        public string OfficeCode { get; set; } = string.Empty;
         public DateTime Date { get; set; }
         public string FinancialYear { get; set; }
         public string ReferenceNo { get; set; }

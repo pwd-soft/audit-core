@@ -217,16 +217,16 @@ namespace PWD.Audit.Services
             return Data;
         }
 
-        private List<SummaryReportDto> GetZoneData(List<ObjectionDto> objections, List<OrganizationUnitDto> offices, SummaryReportType type) 
-        {
-        }
+        //private List<SummaryReportDto> GetZoneData(List<ObjectionDto> objections, List<OrganizationUnitDto> offices, SummaryReportType type) 
+        //{
+        //}
         
-        private List<SummaryReportDto> GetCircleData() 
-        {
-        }
+        //private List<SummaryReportDto> GetCircleData() 
+        //{
+        //}
 
-        private List<SummaryReportDto> GetDivisionData() 
-        {
-        }
+        //private List<SummaryReportDto> GetDivisionData() 
+        //{
+        //}
     }
 }

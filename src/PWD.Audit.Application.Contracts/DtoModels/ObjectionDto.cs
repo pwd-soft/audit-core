@@ -9,6 +9,7 @@ namespace PWD.Audit.DtoModels
     public class ObjectionDto  : EntityDto<int>
     {
         public Guid OfficeId { get; set; }
+        public string OfficeCode { get; set; } = string.Empty;
         public DateTime Date { get; set; }
         public string FinancialYear { get; set; }
         public ObjectionType ObjectionType { get; set; }
@@ -27,6 +28,8 @@ namespace PWD.Audit.DtoModels
         public List<FileDataInput> FileDataInput { get; set; }
         public string MemoNumber { get; set; }
         public DateTime MemoDate { get; set; }
+        public string ObjectionMemoNumber { get; set; }
+        public DateTime ObjectionDate { get; set; }
         public int AnswerCount { get; set; } = 0;
         public string Comments { get; set; } = string.Empty;
         public string ArticleNumber { get; set; } = string.Empty;
