@@ -185,48 +185,162 @@ namespace PWD.Audit.Services
 
             var currentDay = DateTime.Today;
             var firstDayOfCurrentMonth = new DateTime(currentDay.Year, currentDay.Month, 1);
+            var firstDayOfPreviousMonth = firstDayOfCurrentMonth.AddMonths(-1);
             var lastDayOfPreviousMonth = firstDayOfCurrentMonth.AddDays(-1);
 
             int serial = 1;
 
             foreach(var id in OfficeIds)
             {
-                var identifyOffice = offices.FirstOrDefault(o => o.id == Guid.Parse(id));
-                
-                if (identifyOffice is not null) 
-                {
-                    switch (identifyOffice.layer)
-                    {
-                        case "Zone":
-                            break;
-                        case "Circle":
-                            break;
-                        case "Division":
-                            break;
-                    }
-                }
+                var result = GetZoneData(objections, offices, Guid.Parse(id), type);
+                Data.AddRange(result);
             }
 
-            switch (type)
-            {
-                case SummaryReportType.Combined:
+            //switch (type)
+            //{
+            //    case SummaryReportType.Combined:
 
-                    break;
-            }
+            //        break;
+            //}
 
             return Data;
         }
 
-        //private List<SummaryReportDto> GetZoneData(List<ObjectionDto> objections, List<OrganizationUnitDto> offices, SummaryReportType type) 
-        //{
-        //}
-        
-        //private List<SummaryReportDto> GetCircleData() 
-        //{
-        //}
+        private List<SummaryReportDto> GetZoneData(List<ObjectionDto> objections, List<OrganizationUnitDto> offices, Guid officeId, SummaryReportType type)
+        {
+            List<SummaryReportDto> zoneSummaryList = new List<SummaryReportDto>();
+            var objectionList = objections.Where(o => o.OfficeId == officeId).ToList();
+            var summary = AssignData(objectionList);
+            zoneSummaryList.Add(summary);
+            
+            var circleSummary = GetCircleData(objections, offices, officeId, type);
+            
+            if(type == SummaryReportType.Combined) 
+            {
+                zoneSummaryList = CombineData(zoneSummaryList, circleSummary);
+            }
+            
+            if(type == SummaryReportType.Detailed) 
+            {
+                zoneSummaryList.AddRange(circleSummary);
+            }
+            
+            return zoneSummaryList;
+        }
 
-        //private List<SummaryReportDto> GetDivisionData() 
-        //{
-        //}
+        private List<SummaryReportDto> GetCircleData(List<ObjectionDto> objections, List<OrganizationUnitDto> offices, Guid officeId, SummaryReportType type)
+        {
+            List<SummaryReportDto> circleSummaryList = new List<SummaryReportDto>();
+            var circles = offices.Where(o => o.parentId == officeId).ToList();
+
+            foreach (var item in circles)
+            {
+                var objectionList = objections.Where(o => o.OfficeId == item.id).ToList();
+                var summary = AssignData(objectionList);
+                circleSummaryList.Add(summary);
+
+                var divisionSummary = GetDivisionData(objections, offices, officeId, type);
+
+                if (type == SummaryReportType.Combined)
+                {
+                    circleSummaryList = CombineData(circleSummaryList, divisionSummary);
+                }
+
+                if (type == SummaryReportType.Detailed)
+                {
+                    circleSummaryList.AddRange(divisionSummary);
+                }
+            }           
+            
+            return circleSummaryList;
+        }
+
+        private List<SummaryReportDto> GetDivisionData(List<ObjectionDto> objections, List<OrganizationUnitDto> offices, Guid officeId, SummaryReportType type)
+        {
+            List<SummaryReportDto> divisionSummaryList = new List<SummaryReportDto>();
+            var circles = offices.Where(o => o.parentId == officeId).ToList();
+
+            foreach (var item in circles)
+            {
+                var objectionList = objections.Where(o => o.OfficeId == item.id).ToList();
+                var summary = AssignData(objectionList);
+                divisionSummaryList.Add(summary);
+
+                var divisionSummary = GetDivisionData(objections, offices, officeId, type);
+
+                if (type == SummaryReportType.Combined)
+                {
+                    divisionSummaryList = CombineData(divisionSummaryList, divisionSummary);
+                }
+
+                if (type == SummaryReportType.Detailed)
+                {
+                    divisionSummaryList.AddRange(divisionSummary);
+                }
+            }
+
+            return divisionSummaryList;
+        }
+
+        private SummaryReportDto AssignData(List<ObjectionDto> list) 
+        {
+            var currentDay = DateTime.Today;
+            var firstDayOfCurrentMonth = new DateTime(currentDay.Year, currentDay.Month, 1);
+            var firstDayOfPreviousMonth = firstDayOfCurrentMonth.AddMonths(-1);
+            var lastDayOfPreviousMonth = firstDayOfCurrentMonth.AddDays(-1);
+
+            var previousMonthData = list.Where(l => l.ObjectionDate <= lastDayOfPreviousMonth);
+            var currentMonthData = list.Where(l => l.ObjectionDate >= firstDayOfCurrentMonth);
+
+            var summary = new SummaryReportDto();
+
+            summary.PreviousObjectionNumber = previousMonthData.Count();
+            summary.PreviousObjectionAmount = previousMonthData.Sum(p => p.Value);
+
+            summary.CurrentObjectionNumber = currentMonthData.Count();
+            summary.CurrentObjectionAmount = currentMonthData.Sum(p => p.Value);
+
+            summary.SubTotalObjectionNumber = summary.PreviousObjectionNumber + summary.CurrentObjectionNumber;
+            summary.SubTotalObjectionAmount = summary.PreviousObjectionAmount + summary.CurrentObjectionAmount;
+
+            //summary.PreviousBroadsheetNumber = previousMonthData.Count(p => p.ObjectionDate >= firstDayOfPreviousMonth && p.ObjectionDate <= lastDayOfPreviousMonth);
+            //summary.UnsetteledBroadsheetNumber = previousMonthData.Count(p => p.ObjectionDate >= firstDayOfPreviousMonth && p.ObjectionDate <= lastDayOfPreviousMonth);
+
+            summary.CurrentObjectionSettlementNumber = currentMonthData.Count(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay);
+            summary.CurrentObjectionSettlementAmount = currentMonthData.Where(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay).Sum(s => s.Value);
+
+            summary.NonSfiNumber = list.Count(l => l.ObjectionType == ObjectionType.NonSFI) - list.Count(l => l.ObjectionType == ObjectionType.NonSFI && l.MemoNumber is not null);
+            summary.SfiNumber = list.Count(l => l.ObjectionType == ObjectionType.SFI) - list.Count(l => l.ObjectionType == ObjectionType.SFI && l.MemoNumber is not null);
+            summary.DraftNumber = list.Count(l => l.ObjectionType == ObjectionType.Draft) - list.Count(l => l.ObjectionType == ObjectionType.Draft && l.MemoNumber is not null);
+            summary.TotalObjectionNumber = summary.NonSfiNumber + summary.SfiNumber + summary.DraftNumber;
+            summary.TotalObjectionAmount = list.Where(l => l.MemoNumber == null).Sum(s => s.Value);
+
+            return summary;
+        }
+        
+        private List<SummaryReportDto> CombineData(List<SummaryReportDto> destination, List<SummaryReportDto> source) 
+        {
+            foreach (var item in source)
+            {
+                destination[0].PreviousObjectionNumber += item.PreviousObjectionNumber;
+                destination[0].PreviousObjectionAmount += item.PreviousObjectionAmount;
+                destination[0].CurrentObjectionNumber += item.CurrentObjectionNumber;
+                destination[0].CurrentObjectionAmount += item.CurrentObjectionAmount;
+                destination[0].SubTotalObjectionNumber += item.SubTotalObjectionNumber;
+                destination[0].SubTotalObjectionAmount += item.SubTotalObjectionAmount;
+                destination[0].PreviousBroadsheetNumber += item.PreviousBroadsheetNumber;
+                destination[0].UnsetteledBroadsheetNumber += item.UnsetteledBroadsheetNumber;
+                destination[0].CurrentObjectionSettlementNumber += item.CurrentObjectionSettlementNumber;
+                destination[0].CurrentObjectionSettlementAmount += item.CurrentObjectionSettlementAmount;
+                destination[0].NonSfiNumber += item.NonSfiNumber;
+                destination[0].SfiNumber += item.SfiNumber;
+                destination[0].DraftNumber += item.DraftNumber;
+                destination[0].TotalObjectionNumber += item.TotalObjectionNumber;
+                destination[0].TotalObjectionAmount += item.TotalObjectionAmount;
+
+            }
+
+            return destination;
+        }
     }
 }
