@@ -1,7 +1,9 @@
 ﻿using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
 using PWD.Audit.Enum;
+using PWD.Audit.InputDtos;
 using PWD.Audit.Interfaces;
+using Scriban.Runtime.Accessors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,14 +19,16 @@ namespace PWD.Audit.Services
         private readonly IRepository<Objection, int> _objectionRepository;
         private readonly IRepository<SummaryLine, int> _summaryLineRepository;
         private IApprovalAppService _approvalAppService;
+        private IObjectionAppService _objectionAppService;
 
         private const string AuditMonitoringOfficeRole = "AuditOfficeAdmin";
-        public SummaryAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> SummaryLineRepository, IRepository<Objection, int> objectionRepository, IApprovalAppService approvalAppService)
+        public SummaryAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> SummaryLineRepository, IRepository<Objection, int> objectionRepository, IApprovalAppService approvalAppService, IObjectionAppService objectionAppService)
         {
             _repository = repository;
             _summaryLineRepository = SummaryLineRepository;
             _objectionRepository = objectionRepository;
             _approvalAppService = approvalAppService;
+            _objectionAppService = objectionAppService;
         }
 
         public async Task<SummaryDto> CreateAsync(SummaryDto SummaryInput)
@@ -80,7 +84,7 @@ namespace PWD.Audit.Services
             return result;
         }
 
-        public async Task<SummaryDto> GetByOffice(Guid officeId)
+        private async Task<SummaryDto> GetByOffice(Guid officeId)
         {
             var objections = await _objectionRepository.GetListAsync(x=>x.OfficeId==officeId);
             var sfi=objections.Where(o=>o.ObjectionType==Enum.ObjectionType.SFI).ToList();
@@ -137,5 +141,92 @@ namespace PWD.Audit.Services
         public async Task<List<SummaryDto>> GetListAsync() => ObjectMapper.Map<List<Summary>, List<SummaryDto>>(await _repository.GetListAsync());
 
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
+
+        public async Task<List<SummaryReportDto>> GenerateSummaryReport(SummaryReportInputDto summaryReportCriteria)
+        {
+            List<SummaryReportDto> SummaryReportData = new List<SummaryReportDto>();
+
+            switch (summaryReportCriteria.Type) 
+            {
+                case SummaryReportType.PWD:
+                    //var lastMonthObjections = objections.Where(o => o.)
+                    break;
+                case SummaryReportType.Combined:
+                    if(summaryReportCriteria.Offices.Count > 0)
+                    {
+                        //switch (summaryReportCriteria.SubType)
+                        //{
+                        //    case SummaryReportSubType.Zonewise:
+                        //        //summaryReportCriteria.Offices.Any(o => o.id);
+                        //        break;
+                        //    case SummaryReportSubType.Circlewise:
+                        //        break;
+                        //}
+
+                        SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, SummaryReportType.Combined);
+                    }
+                    
+                    break;
+                case SummaryReportType.Detailed:
+                    break;        
+                case SummaryReportType.Officewise:
+                    break;
+            }
+
+            return SummaryReportData;
+        }
+
+        private async Task<List<SummaryReportDto>> ProcessSummaryData(List<string> OfficeIds, SummaryReportType type)
+        {
+            List<SummaryReportDto> Data = new List<SummaryReportDto>();
+
+            var offices = await _approvalAppService.GetOffices();
+            var objections = await _objectionAppService.GetListAsync();
+
+            var currentDay = DateTime.Today;
+            var firstDayOfCurrentMonth = new DateTime(currentDay.Year, currentDay.Month, 1);
+            var lastDayOfPreviousMonth = firstDayOfCurrentMonth.AddDays(-1);
+
+            int serial = 1;
+
+            foreach(var id in OfficeIds)
+            {
+                var identifyOffice = offices.FirstOrDefault(o => o.id == Guid.Parse(id));
+                
+                if (identifyOffice is not null) 
+                {
+                    switch (identifyOffice.layer)
+                    {
+                        case "Zone":
+                            break;
+                        case "Circle":
+                            break;
+                        case "Division":
+                            break;
+                    }
+                }
+            }
+
+            switch (type)
+            {
+                case SummaryReportType.Combined:
+
+                    break;
+            }
+
+            return Data;
+        }
+
+        private List<SummaryReportDto> GetZoneData(List<ObjectionDto> objections, List<OrganizationUnitDto> offices, SummaryReportType type) 
+        {
+        }
+        
+        private List<SummaryReportDto> GetCircleData() 
+        {
+        }
+
+        private List<SummaryReportDto> GetDivisionData() 
+        {
+        }
     }
 }
