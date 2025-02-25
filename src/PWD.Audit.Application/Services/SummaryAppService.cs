@@ -3,6 +3,7 @@ using PWD.Audit.Entities;
 using PWD.Audit.Enum;
 using PWD.Audit.InputDtos;
 using PWD.Audit.Interfaces;
+using PWD.Audit.Models;
 using Scriban.Runtime.Accessors;
 using System;
 using System.Collections.Generic;
@@ -21,14 +22,23 @@ namespace PWD.Audit.Services
         private IApprovalAppService _approvalAppService;
         private IObjectionAppService _objectionAppService;
 
+        private IRepository<ResponseHistory, int> _responseHistory;
+        private IRepository<YearlyObjection, int> _yearlyObjection;
+
         private const string AuditMonitoringOfficeRole = "AuditOfficeAdmin";
-        public SummaryAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> SummaryLineRepository, IRepository<Objection, int> objectionRepository, IApprovalAppService approvalAppService, IObjectionAppService objectionAppService)
+        private List<OrganizationUnitDto> offices = new List<OrganizationUnitDto>();
+
+        public SummaryAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> SummaryLineRepository, IRepository<Objection, int> objectionRepository, IApprovalAppService approvalAppService, IObjectionAppService objectionAppService
+            , IRepository<ResponseHistory, int> responseHistory, IRepository<YearlyObjection, int> yearlyObjection)
         {
             _repository = repository;
             _summaryLineRepository = SummaryLineRepository;
             _objectionRepository = objectionRepository;
             _approvalAppService = approvalAppService;
             _objectionAppService = objectionAppService;
+            
+            _responseHistory = responseHistory;
+            _yearlyObjection = yearlyObjection;
         }
 
         public async Task<SummaryDto> CreateAsync(SummaryDto SummaryInput)
@@ -154,20 +164,14 @@ namespace PWD.Audit.Services
                 case SummaryReportType.Combined:
                     if(summaryReportCriteria.Offices.Count > 0)
                     {
-                        //switch (summaryReportCriteria.SubType)
-                        //{
-                        //    case SummaryReportSubType.Zonewise:
-                        //        //summaryReportCriteria.Offices.Any(o => o.id);
-                        //        break;
-                        //    case SummaryReportSubType.Circlewise:
-                        //        break;
-                        //}
-
-                        SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, SummaryReportType.Combined);
-                    }
-                    
+                        SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, summaryReportCriteria.Type);
+                    }                    
                     break;
                 case SummaryReportType.Detailed:
+                    if (summaryReportCriteria.Offices.Count > 0)
+                    {
+                        SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, summaryReportCriteria.Type);
+                    }
                     break;        
                 case SummaryReportType.Officewise:
                     break;
@@ -175,45 +179,38 @@ namespace PWD.Audit.Services
 
             return SummaryReportData;
         }
-
+        
         private async Task<List<SummaryReportDto>> ProcessSummaryData(List<string> OfficeIds, SummaryReportType type)
         {
             List<SummaryReportDto> Data = new List<SummaryReportDto>();
-
-            var offices = await _approvalAppService.GetOffices();
-            var objections = await _objectionAppService.GetListAsync();
-
-            var currentDay = DateTime.Today;
-            var firstDayOfCurrentMonth = new DateTime(currentDay.Year, currentDay.Month, 1);
-            var firstDayOfPreviousMonth = firstDayOfCurrentMonth.AddMonths(-1);
-            var lastDayOfPreviousMonth = firstDayOfCurrentMonth.AddDays(-1);
+            offices = await _approvalAppService.GetOffices();
 
             int serial = 1;
 
             foreach(var id in OfficeIds)
             {
-                var result = GetZoneData(objections, offices, Guid.Parse(id), type);
+                var result = await GetZoneData(Guid.Parse(id), type);
                 Data.AddRange(result);
             }
 
-            //switch (type)
-            //{
-            //    case SummaryReportType.Combined:
-
-            //        break;
-            //}
+            foreach (var item in Data)
+            {
+                item.Serial = serial;
+                serial++;
+            }
 
             return Data;
         }
 
-        private List<SummaryReportDto> GetZoneData(List<ObjectionDto> objections, List<OrganizationUnitDto> offices, Guid officeId, SummaryReportType type)
+        private async Task<List<SummaryReportDto>> GetZoneData(Guid officeId, SummaryReportType type)
         {
             List<SummaryReportDto> zoneSummaryList = new List<SummaryReportDto>();
-            var objectionList = objections.Where(o => o.OfficeId == officeId).ToList();
+            var objectionList = await _objectionAppService.GetListByOfficeIdAsync(officeId);
             var summary = AssignData(objectionList);
+            summary.Name = offices.FirstOrDefault(o => o.id == officeId).displayNameBn;
             zoneSummaryList.Add(summary);
             
-            var circleSummary = GetCircleData(objections, offices, officeId, type);
+            var circleSummary = await GetCircleData(officeId, type);
             
             if(type == SummaryReportType.Combined) 
             {
@@ -228,18 +225,19 @@ namespace PWD.Audit.Services
             return zoneSummaryList;
         }
 
-        private List<SummaryReportDto> GetCircleData(List<ObjectionDto> objections, List<OrganizationUnitDto> offices, Guid officeId, SummaryReportType type)
+        private async Task<List<SummaryReportDto>>GetCircleData(Guid officeId, SummaryReportType type)
         {
             List<SummaryReportDto> circleSummaryList = new List<SummaryReportDto>();
             var circles = offices.Where(o => o.parentId == officeId).ToList();
 
             foreach (var item in circles)
             {
-                var objectionList = objections.Where(o => o.OfficeId == item.id).ToList();
+                var objectionList = await _objectionAppService.GetListByOfficeIdAsync(item.id);
                 var summary = AssignData(objectionList);
+                summary.Name = item.displayNameBn;
                 circleSummaryList.Add(summary);
 
-                var divisionSummary = GetDivisionData(objections, offices, officeId, type);
+                var divisionSummary = await GetDivisionData(item.id, type);
 
                 if (type == SummaryReportType.Combined)
                 {
@@ -255,27 +253,27 @@ namespace PWD.Audit.Services
             return circleSummaryList;
         }
 
-        private List<SummaryReportDto> GetDivisionData(List<ObjectionDto> objections, List<OrganizationUnitDto> offices, Guid officeId, SummaryReportType type)
+        private async Task<List<SummaryReportDto>> GetDivisionData(Guid officeId, SummaryReportType type)
         {
             List<SummaryReportDto> divisionSummaryList = new List<SummaryReportDto>();
             var circles = offices.Where(o => o.parentId == officeId).ToList();
 
             foreach (var item in circles)
             {
-                var objectionList = objections.Where(o => o.OfficeId == item.id).ToList();
+                var objectionList = await _objectionAppService.GetListByOfficeIdAsync(item.id);
                 var summary = AssignData(objectionList);
-                divisionSummaryList.Add(summary);
-
-                var divisionSummary = GetDivisionData(objections, offices, officeId, type);
+                summary.Name = item.displayNameBn;
 
                 if (type == SummaryReportType.Combined)
                 {
+                    var divisionSummary = new List<SummaryReportDto>();
+                    divisionSummary.Add(summary);
                     divisionSummaryList = CombineData(divisionSummaryList, divisionSummary);
                 }
 
                 if (type == SummaryReportType.Detailed)
                 {
-                    divisionSummaryList.AddRange(divisionSummary);
+                    divisionSummaryList.Add(summary);
                 }
             }
 
@@ -341,6 +339,23 @@ namespace PWD.Audit.Services
             }
 
             return destination;
+        }
+
+        public async Task UpdateOfficeCodes()
+        {
+            offices = await _approvalAppService.GetOffices();
+            var objections = await _objectionRepository.GetListAsync();
+            var objectionDto = ObjectMapper.Map<Objection, ObjectionDto>(objections);
+            foreach (var item in objections)
+            {
+                item.OfficeCode = offices.FirstOrDefault(o => o.id == item.OfficeId).parentCode;
+
+                await _objectionAppService.UpdateAsync(ObjectMapper.Map());
+            }
+
+            //responsehistory
+            //summary
+            //yearlyobjection
         }
     }
 }

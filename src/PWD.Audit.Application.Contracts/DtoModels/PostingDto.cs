@@ -38,10 +38,11 @@ namespace PWD.Audit.DtoModels
     }
     public class OrganizationUnitDto 
     {
-        public virtual Guid? id { get; set; }
+        public virtual Guid id { get; set; }
         public virtual Guid? parentId { get; set; }
         public virtual Guid? userId { get; set; }
         public virtual string code { get; set; }
+        public virtual string parentCode { get; set; }
         public virtual string displayName { get; set; }
         public virtual string civilEm { get; set; }
         public string displayNameBn { get; set; }
