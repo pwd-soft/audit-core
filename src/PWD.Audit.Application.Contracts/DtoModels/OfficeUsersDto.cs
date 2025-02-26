@@ -5,7 +5,6 @@ namespace PWD.Audit.DtoModels
 {
     public class OfficeUserDto : EntityDto<int>
     {
-        public Guid OfficeId { get; set; }
         public string OfficeCode { get; set; } = string.Empty;
         public Guid UserId { get; set; }
         public int PostingId { get; set; }

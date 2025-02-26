@@ -59,7 +59,7 @@ namespace PWD.Audit.Services
 
         public async Task<List<OfficeUserDto>> FetchOfficeUsers(OfficeUserDto dto)
         {
-            var OfficeUsers = await _repository.GetListAsync(x => x.OfficeId == dto.OfficeId);
+            var OfficeUsers = await _repository.GetListAsync(x => x.OfficeCode == dto.OfficeCode);
             var OfficeUserDto = ObjectMapper.Map<List<OfficeUser>, List<OfficeUserDto>>(OfficeUsers);
             return OfficeUserDto;
         }

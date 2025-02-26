@@ -6,7 +6,6 @@ namespace PWD.Audit.Entities
 {
     public class OfficeUser : FullAuditedEntity<int>
     {
-        public Guid OfficeId { get; set; }
         public string OfficeCode { get; set; } = string.Empty;
         public Guid UserId { get; set; }
         public int PostingId { get; set; }

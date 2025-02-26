@@ -47,14 +47,9 @@ namespace PWD.Audit.Services
             throw new NotImplementedException();
         }
 
-        public async Task<List<ResponseHistoryDto>> GetListByOfficeIdAsync(Guid officeId)
+        public async Task<List<ResponseHistoryDto>> GetListByObjectionIdAsync(int objectionId)
         {
-            var responseWithDetails = await repository.GetListAsync(r => r.OfficeId == officeId);
-            return ObjectMapper.Map<List<ResponseHistory>, List<ResponseHistoryDto>>(responseWithDetails);
-        }
-        public async Task<List<ResponseHistoryDto>> GetListByObjectionIdAsync(int objecvtionId)
-        {
-            var responseWithDetails = await repository.GetListAsync(r => r.ObjectionId == objecvtionId);
+            var responseWithDetails = await repository.GetListAsync(r => r.ObjectionId == objectionId);
             return ObjectMapper.Map<List<ResponseHistory>, List<ResponseHistoryDto>>(responseWithDetails);
         }
 
