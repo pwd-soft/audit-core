@@ -320,6 +320,8 @@ namespace PWD.Audit.Services
         
         private List<SummaryReportDto> CombineData(List<SummaryReportDto> destination, List<SummaryReportDto> source) 
         {
+            if (destination.Count == 0)
+                destination.Add(new SummaryReportDto());
             foreach (var item in source)
             {
                 destination[0].PreviousObjectionNumber += item.PreviousObjectionNumber;
