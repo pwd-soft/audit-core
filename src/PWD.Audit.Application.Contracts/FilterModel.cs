@@ -19,7 +19,7 @@ namespace PWD.Audit
 
     public class ObjectionFilterModel : FilterModel 
     {
-        public Guid? OfficeId { get; set; }
+        public string? OfficeCode { get; set; }
         public string? FinancialYear { get; set; }
         public ObjectionType? ObjectionType { get; set; }
         public DirectorateType? DirectorateType { get; set; }

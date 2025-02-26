@@ -57,7 +57,7 @@ namespace PWD.Audit.Services
             {
                 ObjectionReportDto objectionReport = new ObjectionReportDto();
                 objectionReport.OrgUnit = office;
-                objectionReport.Objections = await GetObjectionsByOffice((Guid)office.id, reportFilter);
+                objectionReport.Objections = await GetObjectionsByOffice(office.code, reportFilter);
                 processedObjections.Add(objectionReport);
             }
 
@@ -71,12 +71,12 @@ namespace PWD.Audit.Services
             return result;
         }
 
-        private async Task<List<ObjectionDto>> GetObjectionsByOffice(Guid officeId, ReportFilterModel reportFilter)
+        private async Task<List<ObjectionDto>> GetObjectionsByOffice(string officeCode, ReportFilterModel reportFilter)
         {
             var validObjections = new List<ObjectionDto>();
-            var objections = await _objectionService.GetListByOfficeIdAsync(officeId);
+            var objections = await _objectionService.GetListByOfficeCodeAsync(officeCode);
             if(!objections.Any()) return validObjections;
-            var yearlyObjections = await _yearlyObjectionAppService.GetListByOfficeIdAsync(officeId);
+            var yearlyObjections = await _yearlyObjectionAppService.GetListByOfficeCodeAsync(officeCode);
             bool flag = false;
             var yearlySum = yearlyObjections.Sum(x => x.NumberOfObjections);
 
@@ -106,15 +106,15 @@ namespace PWD.Audit.Services
             //    validObjections = validObjections.Where(x => x.Date.Year == reportFilter.FinancialYear).ToList();
 
             if (flag)
-                validObjections.Add(new ObjectionDto { OfficeId = officeId, IsIncomplete = true});
+                validObjections.Add(new ObjectionDto { OfficeCode = officeCode, IsIncomplete = true});
 
             return validObjections;
         }
 
-        private async Task<SummaryDto> GetSummaryByOffice(Guid officeId, ReportFilterModel reportFilter)
+        private async Task<SummaryDto> GetSummaryByOffice(string officeCode, ReportFilterModel reportFilter)
         {
             var objectionFilter = await _objectionRepository.GetQueryableAsync();
-            objectionFilter = objectionFilter.Where(x => x.OfficeId == officeId);
+            objectionFilter = objectionFilter.Where(x => x.OfficeCode == officeCode);
 
             if (reportFilter.DirectorateType > 0)
             {
@@ -138,7 +138,7 @@ namespace PWD.Audit.Services
 
             var finalList = objectionFilter.ToList();
 
-            var objections = await _objectionRepository.GetListAsync(x => x.OfficeId == officeId);
+            var objections = await _objectionRepository.GetListAsync(x => x.OfficeCode == officeCode);
             var sfi = objections.Where(o => o.ObjectionType == Enum.ObjectionType.SFI).ToList();
             var nsfi = objections.Where(o => o.ObjectionType == Enum.ObjectionType.NonSFI).ToList();
             var dr = objections.Where(o => o.ObjectionType == Enum.ObjectionType.Draft).ToList();
@@ -182,7 +182,7 @@ namespace PWD.Audit.Services
                 Type = Enum.ObjectionType.None,
                 TypeName = "মোট",
             };
-            var result = new SummaryDto() { OfficeId = officeId };
+            var result = new SummaryDto() { OfficeCode = officeCode };
             result.SummaryLines.Add(sfiLine);
             result.SummaryLines.Add(nsfiLine);
             result.SummaryLines.Add(drLine);

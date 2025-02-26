@@ -11,6 +11,6 @@ namespace PWD.Audit.Interfaces
         //Task PopulateYearlyObjections();
         Task<YearlyObjectionDto> GetByIdAsync(int id);
         Task<YearlyObjectionDto> UpdateAsync(YearlyObjectionDto input);
-        Task<List<YearlyObjectionDto>> GetListByOfficeIdAsync(Guid officeId);
+        Task<List<YearlyObjectionDto>> GetListByOfficeCodeAsync(string officeCode);
     }
 }

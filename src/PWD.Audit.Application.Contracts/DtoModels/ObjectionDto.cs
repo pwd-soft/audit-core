@@ -8,7 +8,6 @@ namespace PWD.Audit.DtoModels
 {
     public class ObjectionDto  : EntityDto<int>
     {
-        public Guid OfficeId { get; set; }
         public string OfficeCode { get; set; } = string.Empty;
         public DateTime Date { get; set; }
         public string FinancialYear { get; set; }

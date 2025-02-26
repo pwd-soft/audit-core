@@ -29,9 +29,9 @@ namespace PWD.Audit.Services
             return ObjectMapper.Map<YearlyObjection, YearlyObjectionDto>(yearlyObjection);
         }
 
-        public async Task<List<YearlyObjectionDto>> GetListByOfficeIdAsync(Guid officeId)
+        public async Task<List<YearlyObjectionDto>> GetListByOfficeCodeAsync(string officeCode)
         {
-            var listOfYearlyObjections = await _repository.GetListAsync(y => y.OfficeId == officeId);
+            var listOfYearlyObjections = await _repository.GetListAsync(y => y.OfficeCode == officeCode);
             return ObjectMapper.Map<List<YearlyObjection>, List<YearlyObjectionDto>>(listOfYearlyObjections);
         }
 

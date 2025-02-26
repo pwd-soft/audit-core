@@ -129,6 +129,9 @@ namespace PWD.Audit.Services
                 dbItem.Note = objectionInput.Note;
                 dbItem.MemoNumber = objectionInput.MemoNumber;
                 dbItem.MemoDate = objectionInput.MemoDate;
+                dbItem.ArticleNumber = objectionInput.ArticleNumber;
+                dbItem.ObjectionMemoNumber = objectionInput.ObjectionMemoNumber;
+                dbItem.ObjectionDate = objectionInput.ObjectionDate;
 
                 if (objectionInput.FileDataInput?.Count > 0)
                 {
@@ -170,9 +173,9 @@ namespace PWD.Audit.Services
 
         public async Task<List<ObjectionDto>> GetListAsync() => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
 
-        public async Task<List<ObjectionDto>> GetListByOfficeIdAsync(Guid officeId)
+        public async Task<List<ObjectionDto>> GetListByOfficeCodeAsync(string officeCode)
         {
-            var objectionList = await _repository.GetListAsync(i => i.OfficeId == officeId);
+            var objectionList = await _repository.GetListAsync(i => i.OfficeCode == officeCode);
             return ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList);
         }
 
@@ -181,8 +184,8 @@ namespace PWD.Audit.Services
             var queryableList = await _repository.GetQueryableAsync();
             //queryableList.Where(o => o.OfficeId == filterCriteria.OfficeId);
 
-            if (filterCriteria.OfficeId is not null)
-                queryableList = queryableList.Where(o => o.OfficeId == filterCriteria.OfficeId);
+            if (filterCriteria.OfficeCode is not null)
+                queryableList = queryableList.Where(o => o.OfficeCode == filterCriteria.OfficeCode);
 
             if (filterCriteria.DirectorateType > 0)
                 queryableList = queryableList.Where(o => o.DirectorateType == filterCriteria.DirectorateType);
@@ -214,8 +217,8 @@ namespace PWD.Audit.Services
             var queryableList = await _repository.GetQueryableAsync();
             //queryableList.Where(o => o.OfficeId == filterCriteria.OfficeId);
 
-            if (filterCriteria.OfficeId is not null)
-                queryableList = queryableList.Where(o => o.OfficeId == filterCriteria.OfficeId);
+            if (filterCriteria.OfficeCode is not null)
+                queryableList = queryableList.Where(o => o.OfficeCode == filterCriteria.OfficeCode);
 
             if (filterCriteria.DirectorateType > 0)
                 queryableList = queryableList.Where(o => o.DirectorateType == filterCriteria.DirectorateType);

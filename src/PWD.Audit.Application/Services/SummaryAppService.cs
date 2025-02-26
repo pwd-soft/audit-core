@@ -24,12 +24,13 @@ namespace PWD.Audit.Services
 
         private IRepository<ResponseHistory, int> _responseHistory;
         private IRepository<YearlyObjection, int> _yearlyObjection;
+        private IRepository<OfficeUser, int> _officeUserRepo;
 
         private const string AuditMonitoringOfficeRole = "AuditOfficeAdmin";
         private List<OrganizationUnitDto> offices = new List<OrganizationUnitDto>();
 
         public SummaryAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> SummaryLineRepository, IRepository<Objection, int> objectionRepository, IApprovalAppService approvalAppService, IObjectionAppService objectionAppService
-            , IRepository<ResponseHistory, int> responseHistory, IRepository<YearlyObjection, int> yearlyObjection)
+            , IRepository<ResponseHistory, int> responseHistory, IRepository<YearlyObjection, int> yearlyObjection, IRepository<Objection, int> objectionHistory, IRepository<OfficeUser, int> officeUserRepo)
         {
             _repository = repository;
             _summaryLineRepository = SummaryLineRepository;
@@ -39,6 +40,7 @@ namespace PWD.Audit.Services
             
             _responseHistory = responseHistory;
             _yearlyObjection = yearlyObjection;
+            _officeUserRepo = officeUserRepo;
         }
 
         public async Task<SummaryDto> CreateAsync(SummaryDto SummaryInput)
@@ -87,16 +89,16 @@ namespace PWD.Audit.Services
             //});
             foreach (var office in offices.Where(x => x != null))
             {
-                var summary = await GetByOffice((Guid)office.id);
+                var summary = await GetByOffice(office.code);
                 summary.OfficeName = office.displayNameBn;
                 result.Add(summary);
             }
             return result;
         }
 
-        private async Task<SummaryDto> GetByOffice(Guid officeId)
+        public async Task<SummaryDto> GetByOffice(string officeCode)
         {
-            var objections = await _objectionRepository.GetListAsync(x=>x.OfficeId==officeId);
+            var objections = await _objectionRepository.GetListAsync(x=>x.OfficeCode == officeCode);
             var sfi=objections.Where(o=>o.ObjectionType==Enum.ObjectionType.SFI).ToList();
             var nsfi=objections.Where(o=>o.ObjectionType==Enum.ObjectionType.NonSFI).ToList();
             var dr=objections.Where(o=>o.ObjectionType==Enum.ObjectionType.Draft).ToList();
@@ -140,7 +142,7 @@ namespace PWD.Audit.Services
                 Type = Enum.ObjectionType.Draft,
                 TypeName = "মোট",
             };
-            var result = new SummaryDto() { OfficeId = officeId };
+            var result = new SummaryDto() { OfficeCode = officeCode };
             result.SummaryLines.Add(sfiLine);
             result.SummaryLines.Add(nsfiLine);
             result.SummaryLines.Add(drLine);
@@ -189,7 +191,7 @@ namespace PWD.Audit.Services
 
             foreach(var id in OfficeIds)
             {
-                var result = await GetZoneData(Guid.Parse(id), type);
+                var result = await GetZoneData(id, type);
                 Data.AddRange(result);
             }
 
@@ -202,15 +204,15 @@ namespace PWD.Audit.Services
             return Data;
         }
 
-        private async Task<List<SummaryReportDto>> GetZoneData(Guid officeId, SummaryReportType type)
+        private async Task<List<SummaryReportDto>> GetZoneData(string officeCode, SummaryReportType type)
         {
             List<SummaryReportDto> zoneSummaryList = new List<SummaryReportDto>();
-            var objectionList = await _objectionAppService.GetListByOfficeIdAsync(officeId);
+            var objectionList = await _objectionAppService.GetListByOfficeCodeAsync(officeCode);
             var summary = AssignData(objectionList);
-            summary.Name = offices.FirstOrDefault(o => o.id == officeId).displayNameBn;
+            summary.Name = offices.FirstOrDefault(o => o.code == officeCode).displayNameBn;
             zoneSummaryList.Add(summary);
             
-            var circleSummary = await GetCircleData(officeId, type);
+            var circleSummary = await GetCircleData(officeCode, type);
             
             if(type == SummaryReportType.Combined) 
             {
@@ -225,19 +227,19 @@ namespace PWD.Audit.Services
             return zoneSummaryList;
         }
 
-        private async Task<List<SummaryReportDto>>GetCircleData(Guid officeId, SummaryReportType type)
+        private async Task<List<SummaryReportDto>>GetCircleData(string officeCode, SummaryReportType type)
         {
             List<SummaryReportDto> circleSummaryList = new List<SummaryReportDto>();
-            var circles = offices.Where(o => o.parentId == officeId).ToList();
+            var circles = offices.Where(o => o.parentCode == officeCode).ToList();
 
             foreach (var item in circles)
             {
-                var objectionList = await _objectionAppService.GetListByOfficeIdAsync(item.id);
+                var objectionList = await _objectionAppService.GetListByOfficeCodeAsync(item.code);
                 var summary = AssignData(objectionList);
                 summary.Name = item.displayNameBn;
                 circleSummaryList.Add(summary);
 
-                var divisionSummary = await GetDivisionData(item.id, type);
+                var divisionSummary = await GetDivisionData(item.code, type);
 
                 if (type == SummaryReportType.Combined)
                 {
@@ -253,14 +255,14 @@ namespace PWD.Audit.Services
             return circleSummaryList;
         }
 
-        private async Task<List<SummaryReportDto>> GetDivisionData(Guid officeId, SummaryReportType type)
+        private async Task<List<SummaryReportDto>> GetDivisionData(string officeCode, SummaryReportType type)
         {
             List<SummaryReportDto> divisionSummaryList = new List<SummaryReportDto>();
-            var circles = offices.Where(o => o.parentId == officeId).ToList();
+            var circles = offices.Where(o => o.parentCode == officeCode).ToList();
 
             foreach (var item in circles)
             {
-                var objectionList = await _objectionAppService.GetListByOfficeIdAsync(item.id);
+                var objectionList = await _objectionAppService.GetListByOfficeCodeAsync(item.code);
                 var summary = AssignData(objectionList);
                 summary.Name = item.displayNameBn;
 
@@ -341,21 +343,39 @@ namespace PWD.Audit.Services
             return destination;
         }
 
-        public async Task UpdateOfficeCodes()
-        {
-            offices = await _approvalAppService.GetOffices();
-            var objections = await _objectionRepository.GetListAsync();
-            var objectionDto = ObjectMapper.Map<Objection, ObjectionDto>(objections);
-            foreach (var item in objections)
-            {
-                item.OfficeCode = offices.FirstOrDefault(o => o.id == item.OfficeId).parentCode;
+        //public async Task UpdateOfficeCodes(SummaryReportInputDto summaryReportCriteria)
+        //{
+        //    offices = await _approvalAppService.GetOffices();
 
-                await _objectionAppService.UpdateAsync(ObjectMapper.Map());
-            }
+        //    //var objections = await _objectionRepository.GetListAsync();
+        //    //foreach (var item in objections)
+        //    //{
+        //    //    item.OfficeCode = offices.FirstOrDefault(o => o.id == item.OfficeId).code;
+        //    //}
+        //    //await _objectionRepository.UpdateManyAsync(objections, true);
 
-            //responsehistory
-            //summary
-            //yearlyobjection
-        }
+
+        //    //var summary = await _repository.GetListAsync();
+        //    //foreach (var item in summary)
+        //    //{
+        //    //    item.OfficeCode = offices.FirstOrDefault(o => o.id == item.OfficeId).code;
+        //    //}
+        //    //await _repository.UpdateManyAsync(summary, true);
+        //    ////yearlyobjection
+
+        //    //var yearlyObjections = await _yearlyObjection.GetListAsync();
+        //    //foreach (var item in yearlyObjections)
+        //    //{
+        //    //    item.OfficeCode = offices.FirstOrDefault(o => o.id == item.OfficeId).code;
+        //    //}
+        //    //await _yearlyObjection.UpdateManyAsync(yearlyObjections, true);
+
+        //    var officeUsers = await _officeUserRepo.GetListAsync();
+        //    foreach (var item in officeUsers)
+        //    {
+        //        item.OfficeCode = offices.FirstOrDefault(o => o.id == item.OfficeId).code;
+        //    }
+        //    await _officeUserRepo.UpdateManyAsync(officeUsers, true);
+        //}
     }
 }
