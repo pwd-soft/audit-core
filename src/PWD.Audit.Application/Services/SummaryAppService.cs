@@ -157,6 +157,7 @@ namespace PWD.Audit.Services
         public async Task<List<SummaryReportDto>> GenerateSummaryReport(SummaryReportInputDto summaryReportCriteria)
         {
             List<SummaryReportDto> SummaryReportData = new List<SummaryReportDto>();
+            offices = await _approvalAppService.GetOffices();
 
             switch (summaryReportCriteria.Type) 
             {
@@ -176,6 +177,7 @@ namespace PWD.Audit.Services
                     }
                     break;        
                 case SummaryReportType.Officewise:
+                    SummaryReportData = await GetOfficeData(summaryReportCriteria.Offices);
                     break;
             }
 
@@ -185,7 +187,6 @@ namespace PWD.Audit.Services
         private async Task<List<SummaryReportDto>> ProcessSummaryData(List<string> OfficeIds, SummaryReportType type)
         {
             List<SummaryReportDto> Data = new List<SummaryReportDto>();
-            offices = await _approvalAppService.GetOffices();
 
             int serial = 1;
 
@@ -280,6 +281,20 @@ namespace PWD.Audit.Services
             }
 
             return divisionSummaryList;
+        }
+
+        private async Task<List<SummaryReportDto>> GetOfficeData(List<string> OfficeIds)
+        {
+            var officeSummaryList  = new List<SummaryReportDto>();
+            foreach (var item in OfficeIds)
+            {
+                var objections = await _objectionAppService.GetListByOfficeCodeAsync(item);
+                var summary = AssignData(objections);
+                summary.Name = offices.FirstOrDefault(o => o.code == item).displayNameBn;
+                officeSummaryList.Add(summary);
+            }
+
+            return officeSummaryList;
         }
 
         private SummaryReportDto AssignData(List<ObjectionDto> list) 

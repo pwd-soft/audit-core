@@ -1,5 +1,6 @@
 ﻿using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
+using PWD.Audit.Enum;
 using PWD.Audit.Interfaces;
 using PWD.Audit.Models;
 using System;
@@ -53,9 +54,20 @@ namespace PWD.Audit.Services
             return ObjectMapper.Map<List<ResponseHistory>, List<ResponseHistoryDto>>(responseWithDetails);
         }
 
-        public Task<ResponseHistoryDto> UpdateAsync(ResponseHistoryDto input)
+        public async Task<ResponseHistoryDto> UpdateAsync(ResponseHistoryDto input)
         {
-            throw new NotImplementedException();
+            var response = await repository.GetAsync(r => r.Id == input.Id);
+
+            response.ObjectionStatus = input.ObjectionStatus;
+            response.Response = input.Response;
+            response.Date = input.Date;
+            response.MonitorComment = input.MonitorComment;
+            response.MonitorUsername = input.MonitorUsername;
+            //response.LockStatus = input.LockStatus;
+
+            var updatedResponse = await repository.UpdateAsync(response);
+
+            return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(response);
         }
     }
 }
