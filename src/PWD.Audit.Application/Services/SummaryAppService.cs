@@ -304,8 +304,8 @@ namespace PWD.Audit.Services
             var firstDayOfPreviousMonth = firstDayOfCurrentMonth.AddMonths(-1);
             var lastDayOfPreviousMonth = firstDayOfCurrentMonth.AddDays(-1);
 
-            var previousMonthData = list.Where(l => l.ObjectionDate <= lastDayOfPreviousMonth);
-            var currentMonthData = list.Where(l => l.ObjectionDate >= firstDayOfCurrentMonth);
+            var previousMonthData = list.Where(l => l.ObjectionDate >= firstDayOfPreviousMonth && l.ObjectionDate <= lastDayOfPreviousMonth).ToList();
+            var currentMonthData = list.Where(l => l.ObjectionDate >= firstDayOfCurrentMonth).ToList();
 
             var summary = new SummaryReportDto();
 
@@ -318,8 +318,8 @@ namespace PWD.Audit.Services
             summary.SubTotalObjectionNumber = summary.PreviousObjectionNumber + summary.CurrentObjectionNumber;
             summary.SubTotalObjectionAmount = summary.PreviousObjectionAmount + summary.CurrentObjectionAmount;
 
-            //summary.PreviousBroadsheetNumber = previousMonthData.Count(p => p.ObjectionDate >= firstDayOfPreviousMonth && p.ObjectionDate <= lastDayOfPreviousMonth);
-            //summary.UnsetteledBroadsheetNumber = previousMonthData.Count(p => p.ObjectionDate >= firstDayOfPreviousMonth && p.ObjectionDate <= lastDayOfPreviousMonth);
+            summary.PreviousBroadsheetNumber = previousMonthData.Count(p => p.ObjectionStatus == ObjectionStatus.BroadSheetAnswered);
+            summary.UnsetteledBroadsheetNumber = list.Count - list.Count(l => l.ObjectionStatus == ObjectionStatus.Resolved) - list.Count(l => l.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered);
 
             summary.CurrentObjectionSettlementNumber = currentMonthData.Count(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay);
             summary.CurrentObjectionSettlementAmount = currentMonthData.Where(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay).Sum(s => s.Value);
