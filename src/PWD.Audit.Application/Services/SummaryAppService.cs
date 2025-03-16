@@ -162,8 +162,11 @@ namespace PWD.Audit.Services
             switch (summaryReportCriteria.Type) 
             {
                 case SummaryReportType.PWD:
-                    //var lastMonthObjections = objections.Where(o => o.)
-                    break;
+                    //if (summaryReportCriteria.Offices.Count > 0)
+                    //{
+                    //    SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, summaryReportCriteria.Type);
+                    //}
+                    //break;
                 case SummaryReportType.Combined:
                     if(summaryReportCriteria.Offices.Count > 0)
                     {
