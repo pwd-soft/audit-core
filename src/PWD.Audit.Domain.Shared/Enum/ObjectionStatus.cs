@@ -12,6 +12,8 @@ namespace PWD.Audit.Enum
         RequestedReAnswer,
         ReAnswered,
         Resolved,
-        Other
+        Other,
+        RequestedReAnswerFromMinistry,
+        RequestedReAnswerFromAGOffice
     }
 }
