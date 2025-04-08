@@ -1,4 +1,5 @@
 ﻿using PWD.Audit.Enum;
+using PWD.Audit.InputDtos;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,5 +16,7 @@ namespace PWD.Audit.DtoModels
         public string MonitorComment { get; set; } = string.Empty;
         public string MonitorUsername { get; set; } = string.Empty;
         public bool LockStatus { get; set; } = false;
+        public List<FileDataInput> FileDataInput { get; set; }
+        public string Attachments { get; set; }
     }
 }

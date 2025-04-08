@@ -17,5 +17,6 @@ namespace PWD.Audit.Models
         public string MonitorComment { get; set; } = string.Empty;
         public string MonitorUsername { get; set; } = string.Empty;
         public bool LockStatus { get; set; } = false;
+        public string Attachments { get; set; }
     }
 }
