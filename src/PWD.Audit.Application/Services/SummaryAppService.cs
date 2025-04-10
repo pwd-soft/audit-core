@@ -37,7 +37,7 @@ namespace PWD.Audit.Services
             _objectionRepository = objectionRepository;
             _approvalAppService = approvalAppService;
             _objectionAppService = objectionAppService;
-            
+
             _responseHistory = responseHistory;
             _yearlyObjection = yearlyObjection;
             _officeUserRepo = officeUserRepo;
@@ -56,7 +56,7 @@ namespace PWD.Audit.Services
             var dbItem = await _repository.GetAsync(SummaryInput.Id);
 
             if (dbItem is not null)
-            { 
+            {
             }
 
             var updatedItem = await _repository.UpdateAsync(dbItem);
@@ -98,18 +98,18 @@ namespace PWD.Audit.Services
 
         public async Task<SummaryDto> GetByOffice(string officeCode)
         {
-            var objections = await _objectionRepository.GetListAsync(x=>x.OfficeCode == officeCode);
-            var sfi=objections.Where(o=>o.ObjectionType==Enum.ObjectionType.SFI).ToList();
-            var nsfi=objections.Where(o=>o.ObjectionType==Enum.ObjectionType.NonSFI).ToList();
-            var dr=objections.Where(o=>o.ObjectionType==Enum.ObjectionType.Draft).ToList();
+            var objections = await _objectionRepository.GetListAsync(x => x.OfficeCode == officeCode);
+            var sfi = objections.Where(o => o.ObjectionType == ObjectionType.SFI).ToList();
+            var nsfi = objections.Where(o => o.ObjectionType == ObjectionType.NonSFI).ToList();
+            var dr = objections.Where(o => o.ObjectionType == ObjectionType.Draft).ToList();
             var sfiLine = new SummaryLineDto()
             {
                 Count = sfi.Count(),
                 BroadSheet = sfi.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetAnswered),
                 Resolved = sfi.Count(x => x.ObjectionStatus == ObjectionStatus.Resolved),
-                NonBroadSheet = sfi.Count() - sfi.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
+                NonBroadSheet = sfi.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
                 Value = sfi.Sum(x => x.Value),
-                Type = Enum.ObjectionType.SFI,
+                Type = ObjectionType.SFI,
                 TypeName = "এসএফআই",
             };
             var nsfiLine = new SummaryLineDto()
@@ -117,9 +117,9 @@ namespace PWD.Audit.Services
                 Count = nsfi.Count(),
                 BroadSheet = nsfi.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetAnswered),
                 Resolved = nsfi.Count(x => x.ObjectionStatus == ObjectionStatus.Resolved),
-                NonBroadSheet = nsfi.Count() - nsfi.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
+                NonBroadSheet = nsfi.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
                 Value = nsfi.Sum(x => x.Value),
-                Type = Enum.ObjectionType.NonSFI,
+                Type = ObjectionType.NonSFI,
                 TypeName = "নন এসএফআই",
             };
             var drLine = new SummaryLineDto()
@@ -127,9 +127,9 @@ namespace PWD.Audit.Services
                 Count = dr.Count(),
                 BroadSheet = dr.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetAnswered),
                 Resolved = dr.Count(x => x.ObjectionStatus == ObjectionStatus.Resolved),
-                NonBroadSheet = dr.Count() - dr.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
+                NonBroadSheet = dr.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
                 Value = dr.Sum(x => x.Value),
-                Type = Enum.ObjectionType.Draft,
+                Type = ObjectionType.Draft,
                 TypeName = "ড্রাফট",
             };
             var totalLine = new SummaryLineDto()
@@ -137,7 +137,7 @@ namespace PWD.Audit.Services
                 Count = objections.Count(),
                 BroadSheet = objections.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetAnswered),
                 Resolved = objections.Count(x => x.ObjectionStatus == ObjectionStatus.Resolved),
-                NonBroadSheet = objections.Count() - objections.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
+                NonBroadSheet = objections.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
                 Value = objections.Sum(x => x.Value),
                 Type = Enum.ObjectionType.Draft,
                 TypeName = "মোট",
@@ -159,26 +159,26 @@ namespace PWD.Audit.Services
             List<SummaryReportDto> SummaryReportData = new List<SummaryReportDto>();
             offices = await _approvalAppService.GetOffices();
 
-            switch (summaryReportCriteria.Type) 
+            switch (summaryReportCriteria.Type)
             {
                 case SummaryReportType.PWD:
-                    //if (summaryReportCriteria.Offices.Count > 0)
-                    //{
-                    //    SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, summaryReportCriteria.Type);
-                    //}
-                    //break;
+                //if (summaryReportCriteria.Offices.Count > 0)
+                //{
+                //    SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, summaryReportCriteria.Type);
+                //}
+                //break;
                 case SummaryReportType.Combined:
-                    if(summaryReportCriteria.Offices.Count > 0)
+                    if (summaryReportCriteria.Offices.Count > 0)
                     {
                         SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, summaryReportCriteria.Type);
-                    }                    
+                    }
                     break;
                 case SummaryReportType.Detailed:
                     if (summaryReportCriteria.Offices.Count > 0)
                     {
                         SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, summaryReportCriteria.Type);
                     }
-                    break;        
+                    break;
                 case SummaryReportType.Officewise:
                     SummaryReportData = await GetOfficeData(summaryReportCriteria.Offices);
                     break;
@@ -186,14 +186,14 @@ namespace PWD.Audit.Services
 
             return SummaryReportData;
         }
-        
+
         private async Task<List<SummaryReportDto>> ProcessSummaryData(List<string> OfficeIds, SummaryReportType type)
         {
             List<SummaryReportDto> Data = new List<SummaryReportDto>();
 
             int serial = 1;
 
-            foreach(var id in OfficeIds)
+            foreach (var id in OfficeIds)
             {
                 var result = await GetZoneData(id, type);
                 Data.AddRange(result);
@@ -215,23 +215,23 @@ namespace PWD.Audit.Services
             var summary = AssignData(objectionList);
             summary.Name = offices.FirstOrDefault(o => o.code == officeCode).displayNameBn;
             zoneSummaryList.Add(summary);
-            
+
             var circleSummary = await GetCircleData(officeCode, type);
-            
-            if(type == SummaryReportType.Combined) 
+
+            if (type == SummaryReportType.Combined)
             {
                 zoneSummaryList = CombineData(zoneSummaryList, circleSummary);
             }
-            
-            if(type == SummaryReportType.Detailed) 
+
+            if (type == SummaryReportType.Detailed)
             {
                 zoneSummaryList.AddRange(circleSummary);
             }
-            
+
             return zoneSummaryList;
         }
 
-        private async Task<List<SummaryReportDto>>GetCircleData(string officeCode, SummaryReportType type)
+        private async Task<List<SummaryReportDto>> GetCircleData(string officeCode, SummaryReportType type)
         {
             List<SummaryReportDto> circleSummaryList = new List<SummaryReportDto>();
             var circles = offices.Where(o => o.parentCode == officeCode).ToList();
@@ -254,8 +254,8 @@ namespace PWD.Audit.Services
                 {
                     circleSummaryList.AddRange(divisionSummary);
                 }
-            }           
-            
+            }
+
             return circleSummaryList;
         }
 
@@ -288,7 +288,7 @@ namespace PWD.Audit.Services
 
         private async Task<List<SummaryReportDto>> GetOfficeData(List<string> OfficeIds)
         {
-            var officeSummaryList  = new List<SummaryReportDto>();
+            var officeSummaryList = new List<SummaryReportDto>();
             foreach (var item in OfficeIds)
             {
                 var objections = await _objectionAppService.GetListByOfficeCodeAsync(item);
@@ -300,7 +300,7 @@ namespace PWD.Audit.Services
             return officeSummaryList;
         }
 
-        private SummaryReportDto AssignData(List<ObjectionDto> list) 
+        private SummaryReportDto AssignData(List<ObjectionDto> list)
         {
             var currentDay = DateTime.Today;
             var firstDayOfCurrentMonth = new DateTime(currentDay.Year, currentDay.Month, 1);
@@ -335,8 +335,8 @@ namespace PWD.Audit.Services
 
             return summary;
         }
-        
-        private List<SummaryReportDto> CombineData(List<SummaryReportDto> destination, List<SummaryReportDto> source) 
+
+        private List<SummaryReportDto> CombineData(List<SummaryReportDto> destination, List<SummaryReportDto> source)
         {
             if (destination.Count == 0)
                 destination.Add(new SummaryReportDto());
