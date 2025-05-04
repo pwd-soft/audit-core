@@ -505,7 +505,8 @@ namespace PWD.Audit.Services
                 //GET Method
 
                 HttpResponseMessage response =
-                    await client.GetAsync($"api/app/organization-unit/office-users?userName={userName}");
+                    await client.GetAsync($"api/app/organization-unit/office-all-users?userName={userName}");
+                    //await client.GetAsync($"api/app/organization-unit/office-users?userName={userName}");
                 if (response.IsSuccessStatusCode)
                 {
                     var responseString = await response.Content.ReadAsStringAsync();
@@ -636,6 +637,46 @@ namespace PWD.Audit.Services
                 }
             }
             return new List<string>();
+        }
+
+        [HttpPut]
+        public async Task<bool> UpdateUserRole(UpdateRoleDto updateRole)
+        {
+            using (var client = new HttpClient())
+            {
+                var tokenResponse = await GetToken();
+                client.BaseAddress = new Uri(clientUrl);
+                client.SetBearerToken(tokenResponse.AccessToken);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                //GET Method
+
+                var update = JsonSerializer.Serialize(updateRole);
+                var requestContent = new StringContent(update, Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response =
+                    await client.PutAsync(($"api/app/user/role"), requestContent);
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        var responseString = await response.Content.ReadAsStringAsync();
+                        return JsonSerializer.Deserialize<bool>(responseString);
+                        // put the code here that may raise exceptions
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Internal server Error");
+                    return false;
+                }
+            }
+
+            return false;
         }
     }
 

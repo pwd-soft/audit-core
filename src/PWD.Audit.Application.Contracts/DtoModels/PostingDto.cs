@@ -60,6 +60,7 @@ namespace PWD.Audit.DtoModels
         public string userName { get; set; }
         public string name { get; set; }
         public string surName { get; set; }
+        public List<string> roleNames { get; set; } = new List<string>();
     }
     public class RoleDto
     {
@@ -119,6 +120,14 @@ namespace PWD.Audit.DtoModels
         public Guid id { get; set; }
         public Extraproperties extraProperties { get; set; }
     }
+
+    public class UpdateRoleDto
+    {
+        public string UserName { get; set; }
+        public string RoleName { get; set; }
+        public bool IsAdd { get; set; }
+    }
+
 
     public class Extraproperties
     {
