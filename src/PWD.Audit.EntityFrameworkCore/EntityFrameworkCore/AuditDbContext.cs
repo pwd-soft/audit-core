@@ -27,7 +27,6 @@ namespace PWD.Audit.EntityFrameworkCore
          */
         public DbSet<Objection> Objections { get; set; }
         public DbSet<Associate> Associates { get; set; }
-        public DbSet<OfficeUser> OfficeUsers { get; set; }
         public DbSet<Summary> Summaries { get; set; }
         public DbSet<SummaryLine> SummaryLines { get; set; }
         public DbSet<Posting> Postings { get; set; }

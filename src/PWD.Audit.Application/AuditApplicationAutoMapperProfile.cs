@@ -26,9 +26,6 @@ namespace PWD.Audit
             CreateMap<Associate, AssociateDto>();
             CreateMap<AssociateDto, Associate>();
 
-            CreateMap<OfficeUserDto, OfficeUser>();
-            CreateMap<OfficeUser, OfficeUserDto>();
-
             CreateMap<Summary, SummaryDto>();
             CreateMap<SummaryDto, Summary>();
 

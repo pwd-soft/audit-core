@@ -24,13 +24,12 @@ namespace PWD.Audit.Services
 
         private IRepository<ResponseHistory, int> _responseHistory;
         private IRepository<YearlyObjection, int> _yearlyObjection;
-        private IRepository<OfficeUser, int> _officeUserRepo;
 
         private const string AuditMonitoringOfficeRole = "AuditOfficeAdmin";
         private List<OrganizationUnitDto> offices = new List<OrganizationUnitDto>();
 
         public SummaryAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> SummaryLineRepository, IRepository<Objection, int> objectionRepository, IApprovalAppService approvalAppService, IObjectionAppService objectionAppService
-            , IRepository<ResponseHistory, int> responseHistory, IRepository<YearlyObjection, int> yearlyObjection, IRepository<Objection, int> objectionHistory, IRepository<OfficeUser, int> officeUserRepo)
+            , IRepository<ResponseHistory, int> responseHistory, IRepository<YearlyObjection, int> yearlyObjection, IRepository<Objection, int> objectionHistory)
         {
             _repository = repository;
             _summaryLineRepository = SummaryLineRepository;
@@ -40,7 +39,6 @@ namespace PWD.Audit.Services
 
             _responseHistory = responseHistory;
             _yearlyObjection = yearlyObjection;
-            _officeUserRepo = officeUserRepo;
         }
 
         public async Task<SummaryDto> CreateAsync(SummaryDto SummaryInput)
