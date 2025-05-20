@@ -127,11 +127,7 @@ namespace PWD.Audit.Services
         {
             var response = await repository.GetAsync(r => r.Id == input.Id);
 
-            response.ObjectionStatus = input.ObjectionStatus;
             response.Response = input.Response;
-            response.Date = input.Date;
-            response.MonitorComment = input.MonitorComment;
-            response.MonitorUsername = input.MonitorUsername;
             //response.LockStatus = input.LockStatus;
 
             if (input.FileDataInput?.Count > 0)

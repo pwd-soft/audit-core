@@ -11,12 +11,12 @@ namespace PWD.Audit.Models
     public class ResponseHistory : FullAuditedEntity<int>
     {
         public int ObjectionId { get; set; }
-        public ObjectionStatus ObjectionStatus { get; set; } = ObjectionStatus.None;
         public string Response { get; set; } = string.Empty;
-        public DateTime Date { get; set; }
-        public string MonitorComment { get; set; } = string.Empty;
-        public string MonitorUsername { get; set; } = string.Empty;
-        public bool LockStatus { get; set; } = false;
-        public string Attachments { get; set; }
+        public string Recommendation { get; set; } = string.Empty;
+        public string Attachments { get; set; } = string.Empty;
+        public string User { get; set; }
+
+        public virtual ICollection<ResponseComment> ResponseComments { get; set; } = new List<ResponseComment>();
+        public virtual ICollection<ResponseState> ResponseStates { get; set; } = new List<ResponseState>();
     }
 }

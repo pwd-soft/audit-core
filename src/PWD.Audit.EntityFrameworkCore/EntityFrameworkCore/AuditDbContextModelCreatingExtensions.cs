@@ -26,7 +26,9 @@ namespace PWD.Audit.EntityFrameworkCore
             builder.Entity<SummaryLine>(b => b.ToTable("SummaryLines"));
             builder.Entity<Posting>(b => b.ToTable("Postings"));
             builder.Entity<YearlyObjection>(b => b.ToTable("YearlyObjections"));
-            builder.Entity<ResponseHistory>(b => b.ToTable("ResponseHistory"));
+            builder.Entity<ResponseHistory>(b => b.ToTable("ResponseHistories"));
+            builder.Entity<ResponseComment>(b => b.ToTable("ResponseComments"));
+            builder.Entity<ResponseState>(b => b.ToTable("ResponseStates"));
 
         }
     }

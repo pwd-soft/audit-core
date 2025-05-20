@@ -10,13 +10,13 @@ namespace PWD.Audit.DtoModels
     public class ResponseHistoryDto: FullAuditedEntityDto<int>
     {
         public int ObjectionId { get; set; }
-        public ObjectionStatus ObjectionStatus { get; set; } = ObjectionStatus.None;
         public string Response { get; set; } = string.Empty;
-        public DateTime Date { get; set; }
-        public string MonitorComment { get; set; } = string.Empty;
-        public string MonitorUsername { get; set; } = string.Empty;
-        public bool LockStatus { get; set; } = false;
+        public string Recommendation { get; set; } = string.Empty;
         public List<FileDataInput> FileDataInput { get; set; }
         public string Attachments { get; set; }
+        public string User { get; set; }
+
+        public virtual ICollection<ResponseCommentDto> ResponseComments { get; set; } = new List<ResponseCommentDto>();
+        public virtual ICollection<ResponseStateDto> ResponseStates { get; set; } = new List<ResponseStateDto>();
     }
 }

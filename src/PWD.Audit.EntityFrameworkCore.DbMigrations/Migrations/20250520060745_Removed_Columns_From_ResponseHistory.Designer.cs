@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PWD.Audit.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -10,9 +11,10 @@ using Volo.Abp.EntityFrameworkCore;
 namespace PWD.Audit.Migrations
 {
     [DbContext(typeof(AuditMigrationsDbContext))]
-    partial class AttendanceMigrationsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250520060745_Removed_Columns_From_ResponseHistory")]
+    partial class Removed_Columns_From_ResponseHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,9 +100,6 @@ namespace PWD.Audit.Migrations
 
                     b.Property<Guid?>("CreatorId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CurrentOffice")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
@@ -325,56 +324,6 @@ namespace PWD.Audit.Migrations
                     b.ToTable("Postings");
                 });
 
-            modelBuilder.Entity("PWD.Audit.Models.ResponseComment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("DeleterId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Office")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PostingId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ResponseHistoryId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("User")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ResponseHistoryId");
-
-                    b.ToTable("ResponseComments");
-                });
-
             modelBuilder.Entity("PWD.Audit.Models.ResponseHistory", b =>
                 {
                     b.Property<int>("Id")
@@ -406,79 +355,20 @@ namespace PWD.Audit.Migrations
                     b.Property<Guid?>("LastModifierId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("LockStatus")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ObjectionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Recommendation")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Response")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("User")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ObjectionId");
 
-                    b.ToTable("ResponseHistories");
-                });
-
-            modelBuilder.Entity("PWD.Audit.Models.ResponseState", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("DeleterId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Office")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PostingId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ResponseHistoryId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("User")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ResponseHistoryId");
-
-                    b.ToTable("ResponseStates");
+                    b.ToTable("ResponseHistory");
                 });
 
             modelBuilder.Entity("PWD.Audit.Models.YearlyObjection", b =>
@@ -1022,29 +912,11 @@ namespace PWD.Audit.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PWD.Audit.Models.ResponseComment", b =>
-                {
-                    b.HasOne("PWD.Audit.Models.ResponseHistory", null)
-                        .WithMany("ResponseComments")
-                        .HasForeignKey("ResponseHistoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("PWD.Audit.Models.ResponseHistory", b =>
                 {
                     b.HasOne("PWD.Audit.Entities.Objection", null)
                         .WithMany("ResponseHistory")
                         .HasForeignKey("ObjectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("PWD.Audit.Models.ResponseState", b =>
-                {
-                    b.HasOne("PWD.Audit.Models.ResponseHistory", null)
-                        .WithMany("ResponseStates")
-                        .HasForeignKey("ResponseHistoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1095,13 +967,6 @@ namespace PWD.Audit.Migrations
             modelBuilder.Entity("PWD.Audit.Entities.Summary", b =>
                 {
                     b.Navigation("SummaryLines");
-                });
-
-            modelBuilder.Entity("PWD.Audit.Models.ResponseHistory", b =>
-                {
-                    b.Navigation("ResponseComments");
-
-                    b.Navigation("ResponseStates");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>

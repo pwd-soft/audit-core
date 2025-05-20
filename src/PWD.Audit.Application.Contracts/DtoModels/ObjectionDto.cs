@@ -17,8 +17,6 @@ namespace PWD.Audit.DtoModels
         public string Description { get; set; }
         public string Response { get; set; }
         public double Value { get; set; }
-        //public bool IsBroadSheet { get; set; }=false;
-        //public bool IsResolved { get; set; } = false;
         public ObjectionStatus ObjectionStatus { get; set; } = ObjectionStatus.None;
         public bool IsActive { get; set; } = true;
         public string Note { get; set; }
@@ -33,6 +31,7 @@ namespace PWD.Audit.DtoModels
         public string Comments { get; set; } = string.Empty;
         public string ArticleNumber { get; set; } = string.Empty;
         public bool IsIncomplete {  get; set; } = false;
+        public string CurrentOffice { get; set; } = string.Empty;
         public List<ResponseHistoryDto> ResponseHistories { get; set; }
     }
 

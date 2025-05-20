@@ -38,6 +38,12 @@ namespace PWD.Audit
             CreateMap<YearlyObjection, YearlyObjectionDto>();
             CreateMap<YearlyObjectionDto, YearlyObjection>();
 
+            CreateMap<ResponseComment, ResponseCommentDto>();
+            CreateMap<ResponseCommentDto, ResponseComment>();
+
+            CreateMap<ResponseState, ResponseStateDto>();
+            CreateMap<ResponseStateDto, ResponseState>();
+
 
             CreateMap<PostingConsumeDto, PostingDto>()
                 .BeforeMap((s, d) =>

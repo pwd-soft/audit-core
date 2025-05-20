@@ -27,11 +27,18 @@ namespace PWD.Audit.Services
     {
         private readonly IRepository<Objection, int> _repository;
         private readonly IRepository<Associate, int> _associateRepository;
+        private readonly IRepository<ResponseHistory, int> _responseHistoryRepository;
+        private readonly IRepository<ResponseState, int> _responseStateRepository;
+        private readonly IRepository<ResponseComment, int> _responseCommentRepository;
 
-        public ObjectionAppService(IRepository<Objection, int> repository, IRepository<Associate, int> associateRepository)
+        public ObjectionAppService(IRepository<Objection, int> repository, IRepository<Associate, int> associateRepository, IRepository<ResponseState, int> responseStateRepository, 
+            IRepository<ResponseHistory, int> responseHistoryRepository, IRepository<ResponseComment, int> responseCommentRepository)
         {
             _repository = repository;
             _associateRepository = associateRepository;
+            _responseStateRepository = responseStateRepository;
+            _responseHistoryRepository = responseHistoryRepository;
+            _responseCommentRepository = responseCommentRepository;
         }
 
         public async Task<ObjectionDto> CreateAsync(ObjectionDto objectionInput)
@@ -47,6 +54,22 @@ namespace PWD.Audit.Services
             var updateAttachmentField = await _repository.GetAsync(newObjection.Id);
             updateAttachmentField.Attachments = JsonSerializer.Serialize(objectionInput.FileDataInput);
             await _repository.UpdateAsync(updateAttachmentField);
+
+            var response = new ResponseHistory
+            {
+                ObjectionId = newObjection.Id,
+                User = objectionInput.OfficeCode
+            };
+            var newResponseHistory = await _responseHistoryRepository.InsertAsync(response, true);
+
+            var responseState = new ResponseState
+            {
+                ResponseHistoryId = newResponseHistory.Id,
+                Office = objectionInput.OfficeCode,
+                User = objectionInput.OfficeCode,
+                IsLocked = false
+            };
+            await _responseStateRepository.InsertAsync(responseState, true);
 
             return ObjectMapper.Map<Objection, ObjectionDto>(newObjection);
         }
@@ -166,8 +189,13 @@ namespace PWD.Audit.Services
 
         public async Task<ObjectionDto> GetByIdAsync(int id)
         {
-            var objectionWithDetails = await _repository.WithDetailsAsync(o => o.Associates, r=>r.ResponseHistory);
+            var objectionWithDetails = await _repository.WithDetailsAsync(o => o.Associates, r=>r.ResponseHistories);
             var objection = objectionWithDetails.FirstOrDefault(o => o.Id == id);
+            foreach(var responseHistory in objection.ResponseHistories)
+            {
+                responseHistory.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
+                responseHistory.ResponseComments = await _responseCommentRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
+            };
             return ObjectMapper.Map<Objection, ObjectionDto>(objection);
         }
 
@@ -251,6 +279,30 @@ namespace PWD.Audit.Services
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
 
         //private async Task<List<ObjectionDto>> AllData () => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
+
+        //public async Task UpdateResponseFlow() 
+        //{ 
+        // var objectionList = await _repository.GetListAsync();
+        // foreach (var objection in objectionList)
+        //    {
+        //        var response = new ResponseHistory
+        //        {
+        //            ObjectionId = objection.Id,
+        //            User = "ee_dhk1"
+        //        };
+        //        var newResponseHistory = await _responseHistoryRepository.InsertAsync(response, true);
+
+        //        var responseState = new ResponseState
+        //        {
+        //            ResponseHistoryId = newResponseHistory.Id,
+        //            Office = objection.OfficeCode,
+        //            User = "ee_dhk1",
+        //            IsLocked = false,
+        //        };
+        //        await _responseStateRepository.InsertAsync(responseState, true);
+
+        //    }
+        //}
 
     }
 }
