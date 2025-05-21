@@ -5,7 +5,8 @@ namespace PWD.Audit.Models
 {
     public class ResponseState : FullAuditedEntity<int>
     {
-        public int ResponseHistoryId { get; set; }
+        public int ObjectionId { get; set; }
+        public int? ResponseHistoryId { get; set; }
         public string Note { get; set; } = string.Empty;
         public bool IsModified { get; set; } = false;
         public string Office { get; set; } = string.Empty;

@@ -33,6 +33,7 @@ namespace PWD.Audit.DtoModels
         public bool IsIncomplete {  get; set; } = false;
         public string CurrentOffice { get; set; } = string.Empty;
         public List<ResponseHistoryDto> ResponseHistories { get; set; }
+        public bool IsCentralEntry { get; set; } = false;
     }
 
 }

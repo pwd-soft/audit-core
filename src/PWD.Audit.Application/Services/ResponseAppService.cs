@@ -20,10 +20,14 @@ namespace PWD.Audit.Services
     public class ResponseAppService : ApplicationService, IResponseAppService
     {
         private readonly IRepository<ResponseHistory, int> repository;
+        private readonly IRepository<Objection, int> _objectionRepository;
+        private readonly IRepository<ResponseState, int> _responseStateRepository;
 
-        public ResponseAppService(IRepository<ResponseHistory, int> _repository)
+        public ResponseAppService(IRepository<ResponseHistory, int> _repository, IRepository<Objection, int> objectionRepository, IRepository<ResponseState, int> responseStateRepository)
         {
             repository = _repository;
+            _objectionRepository = objectionRepository;
+            _responseStateRepository = responseStateRepository;
         }
 
         public async Task<ResponseHistoryDto> CreateAsync(ResponseHistoryDto input)
@@ -139,6 +143,31 @@ namespace PWD.Audit.Services
             var updatedResponse = await repository.UpdateAsync(response);
 
             return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(response);
+        }
+
+        public async Task UpdateResponseFlow()
+        {
+            var objectionList = await _objectionRepository.GetListAsync();
+            foreach (var objection in objectionList)
+            {
+                //var response = new ResponseHistory
+                //{
+                //    ObjectionId = objection.Id,
+                //    User = "ee_dhk1"
+                //};
+                //var newResponseHistory = await _responseHistoryRepository.InsertAsync(response, true);
+
+                var responseState = new ResponseState
+                {
+                    ObjectionId = objection.Id,
+                    Office = objection.OfficeCode,
+                    User = "ee_dhk1",
+                    //PostingId = 19362,
+                    IsLocked = false,
+                };
+                await _responseStateRepository.InsertAsync(responseState, true);
+
+            }
         }
     }
 }

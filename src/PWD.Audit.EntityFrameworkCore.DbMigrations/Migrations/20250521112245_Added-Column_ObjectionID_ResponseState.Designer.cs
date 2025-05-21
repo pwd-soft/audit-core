@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PWD.Audit.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -10,9 +11,10 @@ using Volo.Abp.EntityFrameworkCore;
 namespace PWD.Audit.Migrations
 {
     [DbContext(typeof(AuditMigrationsDbContext))]
-    partial class AttendanceMigrationsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250521112245_Added-Column_ObjectionID_ResponseState")]
+    partial class AddedColumn_ObjectionID_ResponseState
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -121,9 +123,6 @@ namespace PWD.Audit.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsCentralEntry")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")

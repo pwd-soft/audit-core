@@ -34,6 +34,8 @@ namespace PWD.Audit.Entities
         public string Comments { get; set; } = string.Empty;
         public string ArticleNumber { get; set; } = string.Empty;
         public string CurrentOffice { get; set; } = string.Empty;
+        public bool IsCentralEntry { get; set; } = false;
+
 
         public List<ResponseHistory> ResponseHistories { get; set; }
     }
