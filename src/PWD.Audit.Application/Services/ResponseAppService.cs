@@ -169,5 +169,12 @@ namespace PWD.Audit.Services
 
             }
         }
+
+        public async Task<ResponseStateDto> GetResponseStateAsync(int objectionId)
+        {
+            var responseStates = await _responseStateRepository.GetListAsync(r => r.ObjectionId == objectionId);
+            var lastResponseSate = responseStates.LastOrDefault();
+            return ObjectMapper.Map<ResponseState, ResponseStateDto>(lastResponseSate);
+        }
     }
 }

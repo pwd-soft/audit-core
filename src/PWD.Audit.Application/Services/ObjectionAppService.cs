@@ -195,6 +195,10 @@ namespace PWD.Audit.Services
             foreach(var responseHistory in objection.ResponseHistories)
             {
                 responseHistory.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
+                if(responseHistory.ResponseStates.Count == 0)
+                {
+                    responseHistory.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ObjectionId == objection.Id);
+                }
                 responseHistory.ResponseComments = await _responseCommentRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
             };
             return ObjectMapper.Map<Objection, ObjectionDto>(objection);
