@@ -103,7 +103,7 @@ namespace PWD.Audit.Services
 
             return fileDataInput;
         }
-        
+
         public Task DeleteAsync(int id)
         {
             throw new NotImplementedException();
@@ -170,11 +170,26 @@ namespace PWD.Audit.Services
             }
         }
 
-        public async Task<ResponseStateDto> GetResponseStateAsync(int objectionId)
+        public async Task<ResponseStateDto> UpdateResponseStateAsync(ResponseStateDto responseStateDto)
         {
-            var responseStates = await _responseStateRepository.GetListAsync(r => r.ObjectionId == objectionId);
-            var lastResponseSate = responseStates.LastOrDefault();
-            return ObjectMapper.Map<ResponseState, ResponseStateDto>(lastResponseSate);
+            var responseByObjection = await _responseStateRepository.GetListAsync(r => r.ObjectionId == responseStateDto.ObjectionId);
+            var lastResponseState = responseByObjection.OrderByDescending(r => r.CreationTime).FirstOrDefault();
+            if (lastResponseState != null)
+            {
+                //throw new Exception("Cannot update response state as it is locked.");
+                if (lastResponseState.ResponseHistoryId == 0) 
+                {
+                    lastResponseState.ResponseHistoryId = responseStateDto.ResponseHistoryId;
+                }
+                lastResponseState.IsLocked = true;
+                await _responseStateRepository.UpdateAsync(lastResponseState);
+            }
+
+            var newResponseState = ObjectMapper.Map<ResponseStateDto, ResponseState>(responseStateDto);
+            await _responseStateRepository.InsertAsync(newResponseState);
+
+            return ObjectMapper.Map<ResponseState, ResponseStateDto>(newResponseState);
+
         }
     }
 }

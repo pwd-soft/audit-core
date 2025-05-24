@@ -14,6 +14,6 @@ namespace PWD.Audit.Interfaces
         Task<List<ResponseHistoryDto>> GetListAsync();
         Task<ResponseHistoryDto> UpdateAsync(ResponseHistoryDto input);
         Task<List<ResponseHistoryDto>> GetListByObjectionIdAsync(int objectionId);
-        Task<ResponseStateDto> GetResponseStateAsync(int objectionId);
+        Task<ResponseStateDto> UpdateResponseStateAsync(ResponseStateDto responseStateDto);
     }
 }
