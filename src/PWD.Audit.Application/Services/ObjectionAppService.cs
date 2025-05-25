@@ -31,7 +31,7 @@ namespace PWD.Audit.Services
         private readonly IRepository<ResponseState, int> _responseStateRepository;
         private readonly IRepository<ResponseComment, int> _responseCommentRepository;
 
-        public ObjectionAppService(IRepository<Objection, int> repository, IRepository<Associate, int> associateRepository, IRepository<ResponseState, int> responseStateRepository, 
+        public ObjectionAppService(IRepository<Objection, int> repository, IRepository<Associate, int> associateRepository, IRepository<ResponseState, int> responseStateRepository,
             IRepository<ResponseHistory, int> responseHistoryRepository, IRepository<ResponseComment, int> responseCommentRepository)
         {
             _repository = repository;
@@ -190,17 +190,18 @@ namespace PWD.Audit.Services
 
         public async Task<ObjectionDto> GetByIdAsync(int id)
         {
-            var objectionWithDetails = await _repository.WithDetailsAsync(o => o.Associates, r=>r.ResponseHistories);
+            var objectionWithDetails = await _repository.WithDetailsAsync(o => o.Associates, r => r.ResponseHistories);
             var objection = objectionWithDetails.FirstOrDefault(o => o.Id == id);
-            foreach(var responseHistory in objection.ResponseHistories)
+            foreach (var responseHistory in objection.ResponseHistories)
             {
                 responseHistory.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
-                if(responseHistory.ResponseStates.Count == 0)
+                if (responseHistory.ResponseStates.Count == 0)
                 {
                     responseHistory.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ObjectionId == objection.Id);
                 }
                 responseHistory.ResponseComments = await _responseCommentRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
-            };
+            }
+            ;
             return ObjectMapper.Map<Objection, ObjectionDto>(objection);
         }
 
@@ -284,6 +285,14 @@ namespace PWD.Audit.Services
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
 
         //private async Task<List<ObjectionDto>> AllData () => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
+
+        public async Task<List<ObjectionDto>> GetSubordinateResponseListAsync(string officeId)
+        {
+            var states = await _responseStateRepository.GetListAsync(i => i.Office == officeId && i.IsLocked == false);
+            var objectionIds = states.Select(s => s.ObjectionId).Distinct().ToList();
+            var objectionList = await _repository.GetListAsync(i => objectionIds.Contains(i.Id));;
+            return ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList);
+        }
 
     }
 }
