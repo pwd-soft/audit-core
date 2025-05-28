@@ -200,8 +200,7 @@ namespace PWD.Audit.Services
                     responseHistory.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ObjectionId == objection.Id);
                 }
                 responseHistory.ResponseComments = await _responseCommentRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
-            }
-            ;
+            };
             return ObjectMapper.Map<Objection, ObjectionDto>(objection);
         }
 
@@ -285,13 +284,58 @@ namespace PWD.Audit.Services
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
 
         //private async Task<List<ObjectionDto>> AllData () => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
-
+        
         public async Task<List<ObjectionDto>> GetSubordinateResponseListAsync(string officeId)
         {
-            var states = await _responseStateRepository.GetListAsync(i => i.Office == officeId && i.IsLocked == false);
-            var objectionIds = states.Select(s => s.ObjectionId).Distinct().ToList();
-            var objectionList = await _repository.GetListAsync(i => objectionIds.Contains(i.Id));;
-            return ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList);
+            var states = await _responseStateRepository.WithDetailsAsync();
+            var stateList = states.Where(i => i.User == officeId && i.IsLocked == false).ToList();
+            var objectionIds = stateList.Select(s => s.ObjectionId).Distinct().ToList();
+            var objections = await _repository.WithDetailsAsync(r => r.ResponseHistories);
+            var objectionList = objections.Where(i => objectionIds.Contains(i.Id));
+            //var objectionListWithLatestResponse = objectionList.Select(o => new ObjectionDto
+            //{
+            //    Id = o.Id,
+            //    OfficeCode = o.OfficeCode,
+            //    Date = o.Date,
+            //    FinancialYear = o.FinancialYear,
+            //    ObjectionType = o.ObjectionType,
+            //    DirectorateType = o.DirectorateType,
+            //    Name = o.Name,
+            //    Description = o.Description,
+            //    Response = o.Response,
+            //    Value = o.Value,
+            //    ObjectionStatus = o.ObjectionStatus,
+            //    IsActive = o.IsActive,
+            //    Note = o.Note,
+            //    Attachments = o.Attachments,
+            //    Associates = ObjectMapper.Map<List<Associate>, List<AssociateDto>>(o.Associates),
+            //    MemoNumber = o.MemoNumber,
+            //    MemoDate = o.MemoDate,
+            //    ObjectionMemoNumber = o.ObjectionMemoNumber,
+            //    ObjectionDate = o.ObjectionDate,
+            //    AnswerCount = o.AnswerCount,
+            //    Comments = o.Comments,
+            //    ArticleNumber = o.ArticleNumber,
+            //    CurrentOffice = o.CurrentOffice,
+            //    ResponseHistories = ObjectMapper.Map<List<ResponseHistory>, List<ResponseHistoryDto>>(o.ResponseHistories),
+            //}).ToList();
+            
+            foreach (var objection in objectionList)
+            {
+                if (objection.ResponseHistories.Count > 0)
+                {
+                    var latestResponse = objection.ResponseHistories.OrderByDescending(r => r.CreationTime).FirstOrDefault();
+                    if (latestResponse != null)
+                    {
+                        //latestResponse.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ResponseHistoryId == latestResponse.Id);
+                        //latestResponse.ResponseComments = await _responseCommentRepository.GetListAsync(x => x.ResponseHistoryId == latestResponse.Id);
+                        objection.ResponseHistories = new List<ResponseHistory> { latestResponse };
+
+                    }
+                }
+            }
+
+            return ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList.ToList());
         }
 
     }

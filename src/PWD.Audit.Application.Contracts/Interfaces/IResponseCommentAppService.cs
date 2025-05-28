@@ -6,9 +6,9 @@ namespace PWD.Audit.Interfaces
 {
     public interface IResponseCommentAppService
     {
-        Task<ObjectionDto> CreateAsync(ObjectionDto input);
-        Task<ObjectionDto> GetByIdAsync(int id);
-        Task<List<ObjectionDto>> GetListAsync();
-        Task<ObjectionDto> UpdateAsync(ObjectionDto input);
+        Task<ResponseCommentDto> CreateAsync(ResponseCommentDto input);
+        Task<ResponseCommentDto> GetByIdAsync(int id);
+        Task<List<ResponseCommentDto>> GetListAsync();
+        Task<ResponseCommentDto> UpdateAsync(ResponseCommentDto input);
     }    
 }
