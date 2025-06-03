@@ -19,13 +19,13 @@ namespace PWD.Audit.Services
 {
     public class ResponseAppService : ApplicationService, IResponseAppService
     {
-        private readonly IRepository<ResponseHistory, int> repository;
+        private readonly IRepository<ResponseHistory, int> _repository;
         private readonly IRepository<Objection, int> _objectionRepository;
         private readonly IRepository<ResponseState, int> _responseStateRepository;
 
         public ResponseAppService(IRepository<ResponseHistory, int> _repository, IRepository<Objection, int> objectionRepository, IRepository<ResponseState, int> responseStateRepository)
         {
-            repository = _repository;
+            this._repository = _repository;
             _objectionRepository = objectionRepository;
             _responseStateRepository = responseStateRepository;
         }
@@ -33,16 +33,16 @@ namespace PWD.Audit.Services
         public async Task<ResponseHistoryDto> CreateAsync(ResponseHistoryDto input)
         {
             var responseHistory = ObjectMapper.Map<ResponseHistoryDto, ResponseHistory>(input);
-            var newresponseHistory = await repository.InsertAsync(responseHistory, true);
+            var newresponseHistory = await _repository.InsertAsync(responseHistory, true);
 
             if (input.FileDataInput?.Count > 0)
             {
                 input.FileDataInput = ProcessAttachments(newresponseHistory.Id, input.FileDataInput, input.Attachments);
             }
 
-            var updateAttachmentField = await repository.GetAsync(newresponseHistory.Id);
+            var updateAttachmentField = await _repository.GetAsync(newresponseHistory.Id);
             updateAttachmentField.Attachments = JsonSerializer.Serialize(input.FileDataInput);
-            await repository.UpdateAsync(updateAttachmentField);
+            await _repository.UpdateAsync(updateAttachmentField);
 
             return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(newresponseHistory);
         }
@@ -112,7 +112,7 @@ namespace PWD.Audit.Services
         public async Task<ResponseHistoryDto> GetByIdAsync(int id)
         {
             //var responseWithDetails = await _repository.WithDetailsAsync(o => o.Associates, r => r.ResponseHistory);
-            var responses = await repository.WithDetailsAsync(r => r.ResponseComments);
+            var responses = await _repository.WithDetailsAsync(r => r.ResponseComments);
             var responseWithDetails = responses.FirstOrDefault(r => r.Id == id);
             return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(responseWithDetails);
         }
@@ -124,13 +124,13 @@ namespace PWD.Audit.Services
 
         public async Task<List<ResponseHistoryDto>> GetListByObjectionIdAsync(int objectionId)
         {
-            var responseWithDetails = await repository.GetListAsync(r => r.ObjectionId == objectionId);
+            var responseWithDetails = await _repository.GetListAsync(r => r.ObjectionId == objectionId);
             return ObjectMapper.Map<List<ResponseHistory>, List<ResponseHistoryDto>>(responseWithDetails);
         }
 
         public async Task<ResponseHistoryDto> UpdateAsync(ResponseHistoryDto input)
         {
-            var response = await repository.GetAsync(r => r.Id == input.Id);
+            var response = await _repository.GetAsync(r => r.Id == input.Id);
 
             response.Response = input.Response;
             //response.LockStatus = input.LockStatus;
@@ -141,7 +141,7 @@ namespace PWD.Audit.Services
                 response.Attachments = JsonSerializer.Serialize(input.FileDataInput);
             }
 
-            var updatedResponse = await repository.UpdateAsync(response);
+            var updatedResponse = await _repository.UpdateAsync(response);
 
             return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(response);
         }
@@ -178,7 +178,7 @@ namespace PWD.Audit.Services
             if (lastResponseState != null)
             {
                 //throw new Exception("Cannot update response state as it is locked.");
-                if (lastResponseState.ResponseHistoryId == 0) 
+                if (lastResponseState.ResponseHistoryId == 0)
                 {
                     lastResponseState.ResponseHistoryId = responseStateDto.ResponseHistoryId;
                 }
@@ -190,7 +190,30 @@ namespace PWD.Audit.Services
             await _responseStateRepository.InsertAsync(newResponseState);
 
             return ObjectMapper.Map<ResponseState, ResponseStateDto>(newResponseState);
+        }
+        
+        public async Task<ResponseHistoryDto> UpdateResponseStatus(ResponseHistoryDto input)
+        {
+            var response = _repository.FirstOrDefault(r => r.Id == input.Id);
+            if (response != null)
+            {
+                response.Status = input.Status;
+                response = await _repository.UpdateAsync(response);
+            }
 
+            if(input.Status == ResponseStatus.RejectedByMinistry)
+            {
+                var responseStates = await _responseStateRepository.GetListAsync(r => r.ResponseHistoryId == input.Id);
+                var latestState = responseStates.OrderByDescending(r => r.CreationTime).FirstOrDefault();
+                if (latestState != null)
+                {
+                    latestState.Note = input.Response;
+                    latestState.IsLocked = true;
+                    await _responseStateRepository.UpdateAsync(latestState);
+                }
+            }
+
+            return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(response);
         }
     }
 }
