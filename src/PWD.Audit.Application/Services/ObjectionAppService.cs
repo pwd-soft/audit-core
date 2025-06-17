@@ -285,10 +285,13 @@ namespace PWD.Audit.Services
 
         //private async Task<List<ObjectionDto>> AllData () => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
         
-        public async Task<List<ObjectionDto>> GetSubordinateResponseListAsync(string officeId)
+        public async Task<List<ObjectionDto>> GetSubordinateResponseListAsync(string officeCode)
         {
+            const string AuditEE = "ee_audit";
             var states = await _responseStateRepository.WithDetailsAsync();
-            var stateList = states.Where(i => i.User == officeId && i.IsLocked == false).ToList();
+            var stateList = states.Where(i => i.User == officeCode && i.IsLocked == false).ToList();
+            if(officeCode == "se_audit")
+                stateList.AddRange(states.Where(i => i.User == AuditEE && i.IsLocked == false).ToList());
             var objectionIds = stateList.Select(s => s.ObjectionId).Distinct().ToList();
             var objections = await _repository.WithDetailsAsync(r => r.ResponseHistories);
             var objectionList = objections.Where(i => objectionIds.Contains(i.Id));
@@ -301,7 +304,6 @@ namespace PWD.Audit.Services
                     if (latestResponse != null)
                     {
                         objection.ResponseHistories = new List<ResponseHistory> { latestResponse };
-
                     }
                 }
             }

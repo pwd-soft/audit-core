@@ -187,7 +187,7 @@ namespace PWD.Audit.Services
             }
 
             var newResponseState = ObjectMapper.Map<ResponseStateDto, ResponseState>(responseStateDto);
-            await _responseStateRepository.InsertAsync(newResponseState);
+            newResponseState = await _responseStateRepository.InsertAsync(newResponseState);
 
             return ObjectMapper.Map<ResponseState, ResponseStateDto>(newResponseState);
         }
