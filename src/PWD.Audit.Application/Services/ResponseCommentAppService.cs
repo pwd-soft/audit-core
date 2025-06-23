@@ -44,5 +44,25 @@ namespace PWD.Audit.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<ResponseCommentDto> GetSuperiorLevelComment(int responseHistoryId, string superiorOfficeCode)
+        {
+            var responseComments = await _repository.GetListAsync(r => r.ResponseHistoryId == responseHistoryId && r.User == superiorOfficeCode);
+            var superiorCommentDto = new ResponseCommentDto();
+            if (responseComments.Any())
+            {
+                if(responseComments.Count > 1) 
+                {
+                    var responseComment = responseComments.OrderByDescending(c => c.CreationTime).FirstOrDefault();
+                    superiorCommentDto = ObjectMapper.Map<ResponseComment, ResponseCommentDto>(responseComment);
+                }
+                else
+                {
+                    return ObjectMapper.Map<ResponseComment, ResponseCommentDto>(responseComments.FirstOrDefault());
+                }
+            }
+            
+            return superiorCommentDto;
+        }
     }
 }

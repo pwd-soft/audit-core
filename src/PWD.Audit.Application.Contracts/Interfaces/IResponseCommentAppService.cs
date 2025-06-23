@@ -10,5 +10,6 @@ namespace PWD.Audit.Interfaces
         Task<ResponseCommentDto> GetByIdAsync(int id);
         Task<List<ResponseCommentDto>> GetListAsync();
         Task<ResponseCommentDto> UpdateAsync(ResponseCommentDto input);
+        Task<ResponseCommentDto> GetSuperiorLevelComment(int responseHistoryId, string superiorOfficeCode);
     }    
 }
