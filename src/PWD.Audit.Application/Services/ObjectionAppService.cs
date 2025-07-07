@@ -195,10 +195,10 @@ namespace PWD.Audit.Services
             foreach (var responseHistory in objection.ResponseHistories)
             {
                 responseHistory.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
-                if (responseHistory.ResponseStates.Count == 0)
-                {
-                    responseHistory.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ObjectionId == objection.Id);
-                }
+                //if (responseHistory.ResponseStates.Count == 0)
+                //{
+                //    responseHistory.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ObjectionId == objection.Id);
+                //}
                 responseHistory.ResponseComments = await _responseCommentRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
             };
             return ObjectMapper.Map<Objection, ObjectionDto>(objection);
@@ -294,21 +294,22 @@ namespace PWD.Audit.Services
                 stateList.AddRange(states.Where(i => i.User == AuditEE && i.IsLocked == false).ToList());
             var objectionIds = stateList.Select(s => s.ObjectionId).Distinct().ToList();
             var objections = await _repository.WithDetailsAsync(r => r.ResponseHistories);
-            var objectionList = objections.Where(i => objectionIds.Contains(i.Id));
+            var objectionList = objections.Where(i => objectionIds.Contains(i.Id)).ToList();
+            var objectionListDto = ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList);
             
-            foreach (var objection in objectionList)
+            foreach (var objectionDto in objectionListDto)
             {
-                if (objection.ResponseHistories.Count > 0)
+                if (objectionDto.ResponseHistories.Count > 0)
                 {
-                    var latestResponse = objection.ResponseHistories.OrderByDescending(r => r.CreationTime).FirstOrDefault();
+                    var latestResponse = objectionDto.ResponseHistories.OrderByDescending(r => r.Id).FirstOrDefault();
                     if (latestResponse != null)
                     {
-                        objection.ResponseHistories = new List<ResponseHistory> { latestResponse };
+                        objectionDto.ResponseHistories = new List<ResponseHistoryDto> { latestResponse };
                     }
                 }
             }
 
-            return ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList.ToList());
+            return objectionListDto;
         }
 
     }

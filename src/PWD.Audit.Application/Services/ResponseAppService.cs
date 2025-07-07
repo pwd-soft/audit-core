@@ -22,12 +22,14 @@ namespace PWD.Audit.Services
         private readonly IRepository<ResponseHistory, int> _repository;
         private readonly IRepository<Objection, int> _objectionRepository;
         private readonly IRepository<ResponseState, int> _responseStateRepository;
+        private readonly IApprovalAppService _approvalService;
 
-        public ResponseAppService(IRepository<ResponseHistory, int> _repository, IRepository<Objection, int> objectionRepository, IRepository<ResponseState, int> responseStateRepository)
+        public ResponseAppService(IRepository<ResponseHistory, int> _repository, IRepository<Objection, int> objectionRepository, IRepository<ResponseState, int> responseStateRepository, IApprovalAppService approvalService)
         {
             this._repository = _repository;
             _objectionRepository = objectionRepository;
             _responseStateRepository = responseStateRepository;
+            _approvalService = approvalService;
         }
 
         public async Task<ResponseHistoryDto> CreateAsync(ResponseHistoryDto input)
@@ -44,7 +46,22 @@ namespace PWD.Audit.Services
             updateAttachmentField.Attachments = JsonSerializer.Serialize(input.FileDataInput);
             await _repository.UpdateAsync(updateAttachmentField);
 
+            var userInfo = await _approvalService.GetPosting(input.User);
+
+            var responseState = new ResponseState
+            {
+                ResponseHistoryId = newresponseHistory.Id,
+                ObjectionId = input.ObjectionId,
+                Office = input.User,
+                User = input.User,
+                PostingId = userInfo.PostingId,
+                IsLocked = false,
+                Note = $"Response initiated from {input.User}"
+            };
+            await _responseStateRepository.InsertAsync(responseState, true);
+
             return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(newresponseHistory);
+            //return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(new ResponseHistory());
         }
 
         private List<FileDataInput> ProcessAttachments(int objectionId, List<FileDataInput> fileDataInput, string attachments)
@@ -194,17 +211,19 @@ namespace PWD.Audit.Services
         
         public async Task<ResponseHistoryDto> UpdateResponseStatus(ResponseHistoryDto input)
         {
+            var responseStates = await _responseStateRepository.GetListAsync(r => r.ResponseHistoryId == input.Id);
+            var latestState = responseStates.OrderByDescending(r => r.CreationTime).FirstOrDefault();
+
             var response = _repository.FirstOrDefault(r => r.Id == input.Id);
             if (response != null)
             {
                 response.Status = input.Status;
+                response.User = latestState.User;
                 response = await _repository.UpdateAsync(response);
             }
 
             if(input.Status == ResponseStatus.RejectedByMinistry)
             {
-                var responseStates = await _responseStateRepository.GetListAsync(r => r.ResponseHistoryId == input.Id);
-                var latestState = responseStates.OrderByDescending(r => r.CreationTime).FirstOrDefault();
                 if (latestState != null)
                 {
                     latestState.Note = input.Response;
