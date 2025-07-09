@@ -285,7 +285,7 @@ namespace PWD.Audit.Services
 
         //private async Task<List<ObjectionDto>> AllData () => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
         
-        public async Task<List<ObjectionDto>> GetSubordinateResponseListAsync(string officeCode)
+        public async Task<List<ObjectionDto>> GetIncomingResponseListAsync(string officeCode)
         {
             const string AuditEE = "ee_audit";
             var states = await _responseStateRepository.WithDetailsAsync();
