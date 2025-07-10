@@ -29,6 +29,7 @@ namespace PWD.Audit.EntityFrameworkCore
             builder.Entity<ResponseHistory>(b => b.ToTable("ResponseHistories"));
             builder.Entity<ResponseComment>(b => b.ToTable("ResponseComments"));
             builder.Entity<ResponseState>(b => b.ToTable("ResponseStates"));
+            builder.Entity<Attachment>(b => b.ToTable("Attachments"));
 
         }
     }

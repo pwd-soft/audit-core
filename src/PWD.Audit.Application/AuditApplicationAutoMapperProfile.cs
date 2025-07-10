@@ -63,6 +63,9 @@ namespace PWD.Audit
                     d.UserName = s.userName;
                 });
 
+            CreateMap<Attachment, AttachmentDto>();
+            CreateMap<AttachmentDto, Attachment>();
+
         }
     }
 }

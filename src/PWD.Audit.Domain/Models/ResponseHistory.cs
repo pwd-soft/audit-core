@@ -13,11 +13,11 @@ namespace PWD.Audit.Models
         public int ObjectionId { get; set; }
         public string Response { get; set; } = string.Empty;
         public string Recommendation { get; set; } = string.Empty;
-        public string Attachments { get; set; } = string.Empty;
         public string User { get; set; }
         public ResponseStatus Status { get; set; } = ResponseStatus.None;
 
         public virtual ICollection<ResponseComment> ResponseComments { get; set; } = new List<ResponseComment>();
         public virtual ICollection<ResponseState> ResponseStates { get; set; } = new List<ResponseState>();
+        public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
     }
 }

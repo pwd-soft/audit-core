@@ -2,11 +2,12 @@
 using PWD.Audit.InputDtos;
 using System;
 using System.Collections.Generic;
+using System.Net.Mail;
 using Volo.Abp.Application.Dtos;
 
 namespace PWD.Audit.DtoModels
 {
-    public class ObjectionDto  : EntityDto<int>
+    public class ObjectionDto : EntityDto<int>
     {
         public string OfficeCode { get; set; } = string.Empty;
         public DateTime Date { get; set; }
@@ -20,9 +21,7 @@ namespace PWD.Audit.DtoModels
         public ObjectionStatus ObjectionStatus { get; set; } = ObjectionStatus.None;
         public bool IsActive { get; set; } = true;
         public string Note { get; set; }
-        public string Attachments { get; set; }
         public List<AssociateDto> Associates { get; set; }
-        public List<FileDataInput> FileDataInput { get; set; }
         public string MemoNumber { get; set; }
         public DateTime MemoDate { get; set; }
         public string ObjectionMemoNumber { get; set; }
@@ -30,10 +29,12 @@ namespace PWD.Audit.DtoModels
         public int AnswerCount { get; set; } = 0;
         public string Comments { get; set; } = string.Empty;
         public string ArticleNumber { get; set; } = string.Empty;
-        public bool IsIncomplete {  get; set; } = false;
+        public bool IsIncomplete { get; set; } = false;
         public string CurrentOffice { get; set; } = string.Empty;
-        public List<ResponseHistoryDto> ResponseHistories { get; set; }
         public bool IsCentralEntry { get; set; } = false;
+
+        public List<ResponseHistoryDto> ResponseHistories { get; set; }
+        public List<AttachmentDto> Attachments { get; set; } = new List<AttachmentDto>();
     }
 
 }

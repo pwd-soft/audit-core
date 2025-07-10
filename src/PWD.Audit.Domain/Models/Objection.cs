@@ -19,12 +19,9 @@ namespace PWD.Audit.Entities
         public string Description { get; set; }
         public string Response { get; set; }
         public double Value { get; set; }
-        //public bool IsBroadSheet { get; set; } = false;
-        //public bool IsResolved { get; set; } = false;
         public ObjectionStatus ObjectionStatus { get; set; } = ObjectionStatus.None;
         public bool IsActive { get; set; } = true;
         public string Note { get; set; }
-        public string Attachments { get; set; }
         public List<Associate> Associates { get; set; }
         public string MemoNumber { get; set; }
         public DateTime MemoDate { get; set; }
@@ -38,5 +35,6 @@ namespace PWD.Audit.Entities
 
 
         public List<ResponseHistory> ResponseHistories { get; set; }
+        public List<Attachment> Attachments { get; set; }
     }
 }

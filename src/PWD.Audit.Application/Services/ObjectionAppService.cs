@@ -30,15 +30,17 @@ namespace PWD.Audit.Services
         private readonly IRepository<ResponseHistory, int> _responseHistoryRepository;
         private readonly IRepository<ResponseState, int> _responseStateRepository;
         private readonly IRepository<ResponseComment, int> _responseCommentRepository;
+        private readonly IAttachmentAppService _attachmentService;
 
         public ObjectionAppService(IRepository<Objection, int> repository, IRepository<Associate, int> associateRepository, IRepository<ResponseState, int> responseStateRepository,
-            IRepository<ResponseHistory, int> responseHistoryRepository, IRepository<ResponseComment, int> responseCommentRepository)
+            IRepository<ResponseHistory, int> responseHistoryRepository, IRepository<ResponseComment, int> responseCommentRepository, IAttachmentAppService attachmentService)
         {
             _repository = repository;
             _associateRepository = associateRepository;
             _responseStateRepository = responseStateRepository;
             _responseHistoryRepository = responseHistoryRepository;
             _responseCommentRepository = responseCommentRepository;
+            _attachmentService = attachmentService;
         }
 
         public async Task<ObjectionDto> CreateAsync(ObjectionDto objectionInput)
@@ -46,21 +48,20 @@ namespace PWD.Audit.Services
             var objection = ObjectMapper.Map<ObjectionDto, Objection>(objectionInput);
             var newObjection = await _repository.InsertAsync(objection, true);
 
-            if (objectionInput.FileDataInput?.Count > 0)
+            if (objectionInput.Attachments?.Count > 0)
             {
-                objectionInput.FileDataInput = ProcessAttachments(newObjection.Id, objectionInput.FileDataInput, objectionInput.Attachments);
+                foreach(var attachment in objectionInput.Attachments) {                     
+                    attachment.ObjectionId = newObjection.Id;
+                    attachment.AttachmentType = AttachmentType.Objection;
+                }
+                // Process attachments to upload folder
+                PorcessFilesToUploadFolder(newObjection.Id, objectionInput.Attachments);
+                //_attachmentService.InsertBulkAsync(objectionInput.Attachments).GetAwaiter().GetResult();
             }
 
-            var updateAttachmentField = await _repository.GetAsync(newObjection.Id);
-            updateAttachmentField.Attachments = JsonSerializer.Serialize(objectionInput.FileDataInput);
-            await _repository.UpdateAsync(updateAttachmentField);
-
-            //var response = new ResponseHistory
-            //{
-            //    ObjectionId = newObjection.Id,
-            //    User = objectionInput.OfficeCode
-            //};
-            //var newResponseHistory = await _responseHistoryRepository.InsertAsync(response, true);
+            //var updateAttachmentField = await _repository.GetAsync(newObjection.Id);
+            //updateAttachmentField.Attachments = JsonSerializer.Serialize(objectionInput.FileDataInput);
+            //await _repository.UpdateAsync(updateAttachmentField);
 
             var responseState = new ResponseState
             {
@@ -75,36 +76,38 @@ namespace PWD.Audit.Services
             return ObjectMapper.Map<Objection, ObjectionDto>(newObjection);
         }
 
-        private List<FileDataInput> ProcessAttachments(int objectionId, List<FileDataInput> fileDataInput, string attachments)
-        {
-            var existingAttachments = new List<FileDataInput>();
+        //private List<FileDataInput> ProcessAttachments(int objectionId, List<FileDataInput> fileDataInput, string attachments)
+        //{
+        //    var existingAttachments = new List<FileDataInput>();
 
-            //Processing proper image path
-            fileDataInput = PorcessFilesToUploadFolder(objectionId, fileDataInput);
+        //    //Processing proper image path
+        //    fileDataInput = PorcessFilesToUploadFolder(objectionId, fileDataInput);
 
-            if (attachments is not null)
-            {
-                existingAttachments = JsonSerializer.Deserialize<FileDataInput[]>(attachments).ToList();
-            }
+        //    if (attachments is not null)
+        //    {
+        //        existingAttachments = JsonSerializer.Deserialize<FileDataInput[]>(attachments).ToList();
+        //    }
 
-            //Assigning id to every attachment by generating random numbers between 1100-2000 and checking,
-            //if the id exists generate new id; then assign the id
-            foreach (var file in fileDataInput)
-            {
-                Random rnd = new Random();
-                int newId = rnd.Next(1100, 2000);
-                while (existingAttachments.Exists(f => f.Id == newId))
-                {
-                    newId = rnd.Next(1100, 2000);
-                }
-                file.Id = newId;
-                existingAttachments.Add(file);
-            }
+        //    //Assigning id to every attachment by generating random numbers between 1100-2000 and checking,
+        //    //if the id exists generate new id; then assign the id
+        //    foreach (var file in fileDataInput)
+        //    {
+        //        Random rnd = new Random();
+        //        int newId = rnd.Next(1100, 2000);
+        //        while (existingAttachments.Exists(f => f.Id == newId))
+        //        {
+        //            newId = rnd.Next(1100, 2000);
+        //        }
+        //        file.Id = newId;
+        //        existingAttachments.Add(file);
+        //    }
 
-            return existingAttachments;
-        }
+        //    return existingAttachments;
+        //}
 
-        private List<FileDataInput> PorcessFilesToUploadFolder(int objectionId, List<FileDataInput> fileDataInput)
+        //private List<AttachmentDto> PorcessFilesToUploadFolder(int objectionId, List<AttachmentDto> fileDataInput)
+        
+        private void PorcessFilesToUploadFolder(int objectionId, List<AttachmentDto> fileDataInput)
         {
             var directoryName = objectionId.ToString();
             var folderName = Path.Combine("wwwroot", "Uploaded_Documents", directoryName);
@@ -129,7 +132,7 @@ namespace PWD.Audit.Services
                 file.Path = path;
             }
 
-            return fileDataInput;
+            //return fileDataInput;
         }
 
         public async Task<ObjectionDto> UpdateAsync(ObjectionDto objectionInput)
@@ -157,15 +160,15 @@ namespace PWD.Audit.Services
                 dbItem.ObjectionMemoNumber = objectionInput.ObjectionMemoNumber;
                 dbItem.ObjectionDate = objectionInput.ObjectionDate;
 
-                if (objectionInput.FileDataInput?.Count > 0)
-                {
-                    objectionInput.FileDataInput = ProcessAttachments(dbItem.Id, objectionInput.FileDataInput, dbItem.Attachments);
-                    dbItem.Attachments = JsonSerializer.Serialize(objectionInput.FileDataInput);
-                }
+                //if (objectionInput.FileDataInput?.Count > 0)
+                //{
+                //    objectionInput.FileDataInput = ProcessAttachments(dbItem.Id, objectionInput.FileDataInput, dbItem.Attachments);
+                //    dbItem.Attachments = JsonSerializer.Serialize(objectionInput.FileDataInput);
+                //}
             }
 
             var updatedItem = await _repository.UpdateAsync(dbItem);
-
+            var newAttachments = objectionInput.Attachments.Where(a => a.ObjectionId == 0).ToList();
             if (objectionInput?.Associates?.Count > 0)
             {
                 var newAssociates = objectionInput.Associates.Where(a => a.Id == 0).ToList();
@@ -190,7 +193,7 @@ namespace PWD.Audit.Services
 
         public async Task<ObjectionDto> GetByIdAsync(int id)
         {
-            var objectionWithDetails = await _repository.WithDetailsAsync(o => o.Associates, r => r.ResponseHistories);
+            var objectionWithDetails = await _repository.WithDetailsAsync(o => o.Associates, r => r.ResponseHistories, a => a.Attachments);
             var objection = objectionWithDetails.FirstOrDefault(o => o.Id == id);
             foreach (var responseHistory in objection.ResponseHistories)
             {

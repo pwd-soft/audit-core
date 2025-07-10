@@ -37,14 +37,14 @@ namespace PWD.Audit.Services
             var responseHistory = ObjectMapper.Map<ResponseHistoryDto, ResponseHistory>(input);
             var newresponseHistory = await _repository.InsertAsync(responseHistory, true);
 
-            if (input.FileDataInput?.Count > 0)
-            {
-                input.FileDataInput = ProcessAttachments(newresponseHistory.Id, input.FileDataInput, input.Attachments);
-            }
+            //if (input.FileDataInput?.Count > 0)
+            //{
+            //    input.FileDataInput = ProcessAttachments(newresponseHistory.Id, input.FileDataInput, input.Attachments);
+            //}
 
-            var updateAttachmentField = await _repository.GetAsync(newresponseHistory.Id);
-            updateAttachmentField.Attachments = JsonSerializer.Serialize(input.FileDataInput);
-            await _repository.UpdateAsync(updateAttachmentField);
+            //var updateAttachmentField = await _repository.GetAsync(newresponseHistory.Id);
+            //updateAttachmentField.Attachments = JsonSerializer.Serialize(input.FileDataInput);
+            //await _repository.UpdateAsync(updateAttachmentField);
 
             var userInfo = await _approvalService.GetPosting(input.User);
 
@@ -152,11 +152,11 @@ namespace PWD.Audit.Services
             response.Response = input.Response;
             //response.LockStatus = input.LockStatus;
 
-            if (input.FileDataInput?.Count > 0)
-            {
-                input.FileDataInput = ProcessAttachments(response.Id, input.FileDataInput, response.Attachments);
-                response.Attachments = JsonSerializer.Serialize(input.FileDataInput);
-            }
+            //if (input.FileDataInput?.Count > 0)
+            //{
+            //    input.FileDataInput = ProcessAttachments(response.Id, input.FileDataInput, response.Attachments);
+            //    response.Attachments = JsonSerializer.Serialize(input.FileDataInput);
+            //}
 
             var updatedResponse = await _repository.UpdateAsync(response);
 

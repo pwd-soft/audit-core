@@ -34,6 +34,7 @@ namespace PWD.Audit.EntityFrameworkCore
         public DbSet<ResponseHistory> ResponseHistories { get; set; }
         public DbSet<ResponseComment> ResponseComments { get; set; }
         public DbSet<ResponseState> ResponseStates { get; set; }
+        public DbSet<Attachment> Attachments { get; set; }
 
         public AuditDbContext(DbContextOptions<AuditDbContext> options)
             : base(options)
