@@ -56,7 +56,7 @@ namespace PWD.Audit.Services
                 }
                 // Process attachments to upload folder
                 PorcessFilesToUploadFolder(newObjection.Id, objectionInput.Attachments);
-                //_attachmentService.InsertBulkAsync(objectionInput.Attachments).GetAwaiter().GetResult();
+                _attachmentService.InsertBulkAsync(objectionInput.Attachments).GetAwaiter().GetResult();
             }
 
             //var updateAttachmentField = await _repository.GetAsync(newObjection.Id);
