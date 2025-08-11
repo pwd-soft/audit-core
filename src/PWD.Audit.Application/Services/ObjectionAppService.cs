@@ -168,7 +168,6 @@ namespace PWD.Audit.Services
             }
 
             var updatedItem = await _repository.UpdateAsync(dbItem);
-            var newAttachments = objectionInput.Attachments.Where(a => a.ObjectionId == 0).ToList();
             if (objectionInput?.Associates?.Count > 0)
             {
                 var newAssociates = objectionInput.Associates.Where(a => a.Id == 0).ToList();
@@ -186,6 +185,20 @@ namespace PWD.Audit.Services
                     await _associateRepository.UpdateManyAsync(updateAssociatesEntity);
                 }
             }
+
+            var newAttachments = objectionInput.Attachments.Where(a => a.ObjectionId == 0).ToList();
+            if (newAttachments.Count > 0)
+            {
+                foreach (var attachment in objectionInput.Attachments)
+                {
+                    attachment.ObjectionId = objectionInput.Id;
+                    attachment.AttachmentType = AttachmentType.Objection;
+                }
+                // Process attachments to upload folder
+                PorcessFilesToUploadFolder(objectionInput.Id, objectionInput.Attachments);
+                _attachmentService.InsertBulkAsync(objectionInput.Attachments).GetAwaiter().GetResult();
+            }
+
 
             return ObjectMapper.Map<Objection, ObjectionDto>(updatedItem);
             //return ObjectMapper.Map<Objection, ObjectionDto>(new Objection());
