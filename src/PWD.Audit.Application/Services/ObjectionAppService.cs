@@ -20,6 +20,7 @@ using System.IO;
 using System.Net.Mail;
 using System.Text.Json;
 using PWD.Audit.Models;
+using PWD.Audit.Helper;
 
 namespace PWD.Audit.Services
 {
@@ -50,12 +51,13 @@ namespace PWD.Audit.Services
 
             if (objectionInput.Attachments?.Count > 0)
             {
-                foreach(var attachment in objectionInput.Attachments) {                     
+                foreach (var attachment in objectionInput.Attachments)
+                {
                     attachment.ObjectionId = newObjection.Id;
                     attachment.AttachmentType = AttachmentType.Objection;
                 }
                 // Process attachments to upload folder
-                PorcessFilesToUploadFolder(newObjection.Id, objectionInput.Attachments);
+                FileProcessing.PorcessFilesToUploadFolder(newObjection.Id, objectionInput.Attachments);
                 _attachmentService.InsertBulkAsync(objectionInput.Attachments).GetAwaiter().GetResult();
             }
 
@@ -106,34 +108,34 @@ namespace PWD.Audit.Services
         //}
 
         //private List<AttachmentDto> PorcessFilesToUploadFolder(int objectionId, List<AttachmentDto> fileDataInput)
-        
-        private void PorcessFilesToUploadFolder(int objectionId, List<AttachmentDto> fileDataInput)
-        {
-            var directoryName = objectionId.ToString();
-            var folderName = Path.Combine("wwwroot", "Uploaded_Documents", directoryName);
-            if (!Directory.Exists(folderName))
-            {
-                DirectoryInfo di = Directory.CreateDirectory(folderName);
-            }
 
-            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+        //private void PorcessFilesToUploadFolder(int objectionId, List<AttachmentDto> fileDataInput)
+        //{
+        //    var directoryName = objectionId.ToString();
+        //    var folderName = Path.Combine("wwwroot", "Uploaded_Documents", directoryName);
+        //    if (!Directory.Exists(folderName))
+        //    {
+        //        DirectoryInfo di = Directory.CreateDirectory(folderName);
+        //    }
 
-            foreach (var file in fileDataInput)
-            {
-                var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", file.Path);
-                var destinationPath = Path.Combine(pathToSave, file.FileName);
+        //    var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
 
-                System.IO.File.Copy(sourcePath, destinationPath, true);
-                System.IO.File.Delete(sourcePath);
-                var savedFileName = file.Path.Split(@"\")[1];
-                var path = Path.Combine(folderName, savedFileName);
-                path = path.Replace(@"wwwroot\", string.Empty);
+        //    foreach (var file in fileDataInput)
+        //    {
+        //        var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", file.Path);
+        //        var destinationPath = Path.Combine(pathToSave, file.FileName);
 
-                file.Path = path;
-            }
+        //        System.IO.File.Copy(sourcePath, destinationPath, true);
+        //        System.IO.File.Delete(sourcePath);
+        //        var savedFileName = file.Path.Split(@"\")[1];
+        //        var path = Path.Combine(folderName, savedFileName);
+        //        path = path.Replace(@"wwwroot\", string.Empty);
 
-            //return fileDataInput;
-        }
+        //        file.Path = path;
+        //    }
+
+        //    //return fileDataInput;
+        //}
 
         public async Task<ObjectionDto> UpdateAsync(ObjectionDto objectionInput)
         {
@@ -195,16 +197,14 @@ namespace PWD.Audit.Services
                     attachment.AttachmentType = AttachmentType.Objection;
                 }
                 // Process attachments to upload folder
-                PorcessFilesToUploadFolder(objectionInput.Id, objectionInput.Attachments);
+                FileProcessing.PorcessFilesToUploadFolder(objectionInput.Id, objectionInput.Attachments);
                 _attachmentService.InsertBulkAsync(objectionInput.Attachments).GetAwaiter().GetResult();
             }
 
-
             return ObjectMapper.Map<Objection, ObjectionDto>(updatedItem);
-            //return ObjectMapper.Map<Objection, ObjectionDto>(new Objection());
         }
 
-        public async Task<ObjectionDto> GetByIdAsync(int id)
+        public async Task<ObjectionDto> GetDetailsByIdAsync(int id)
         {
             var objectionWithDetails = await _repository.WithDetailsAsync(o => o.Associates, r => r.ResponseHistories, a => a.Attachments);
             var objection = objectionWithDetails.FirstOrDefault(o => o.Id == id);
@@ -216,7 +216,8 @@ namespace PWD.Audit.Services
                 //    responseHistory.ResponseStates = await _responseStateRepository.GetListAsync(x => x.ObjectionId == objection.Id);
                 //}
                 responseHistory.ResponseComments = await _responseCommentRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
-            };
+            }
+            ;
             return ObjectMapper.Map<Objection, ObjectionDto>(objection);
         }
 
@@ -300,19 +301,19 @@ namespace PWD.Audit.Services
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
 
         //private async Task<List<ObjectionDto>> AllData () => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
-        
+
         public async Task<List<ObjectionDto>> GetIncomingResponseListAsync(string officeCode)
         {
             const string AuditEE = "ee_audit";
             var states = await _responseStateRepository.WithDetailsAsync();
             var stateList = states.Where(i => i.User == officeCode && i.IsLocked == false).ToList();
-            if(officeCode == "se_audit")
+            if (officeCode == "se_audit")
                 stateList.AddRange(states.Where(i => i.User == AuditEE && i.IsLocked == false).ToList());
             var objectionIds = stateList.Select(s => s.ObjectionId).Distinct().ToList();
             var objections = await _repository.WithDetailsAsync(r => r.ResponseHistories);
             var objectionList = objections.Where(i => objectionIds.Contains(i.Id)).ToList();
             var objectionListDto = ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList);
-            
+
             foreach (var objectionDto in objectionListDto)
             {
                 if (objectionDto.ResponseHistories.Count > 0)
@@ -326,6 +327,16 @@ namespace PWD.Audit.Services
             }
 
             return objectionListDto;
+        }
+
+        public async Task<ObjectionDto> GetByIdAsync(int id)
+        {
+            var objection = await _repository.GetAsync(id);
+            if (objection == null)
+            {
+                throw new KeyNotFoundException($"Objection with ID {id} not found.");
+            }
+            return ObjectMapper.Map<Objection, ObjectionDto>(objection);
         }
 
     }

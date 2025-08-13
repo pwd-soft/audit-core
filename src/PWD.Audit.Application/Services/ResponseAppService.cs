@@ -1,6 +1,7 @@
 ﻿using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
 using PWD.Audit.Enum;
+using PWD.Audit.Helper;
 using PWD.Audit.InputDtos;
 using PWD.Audit.Interfaces;
 using PWD.Audit.Models;
@@ -20,16 +21,18 @@ namespace PWD.Audit.Services
     public class ResponseAppService : ApplicationService, IResponseAppService
     {
         private readonly IRepository<ResponseHistory, int> _repository;
-        private readonly IRepository<Objection, int> _objectionRepository;
         private readonly IRepository<ResponseState, int> _responseStateRepository;
+        private readonly IObjectionAppService _objectionService;
         private readonly IApprovalAppService _approvalService;
+        private readonly IAttachmentAppService _attachmentService;
 
-        public ResponseAppService(IRepository<ResponseHistory, int> _repository, IRepository<Objection, int> objectionRepository, IRepository<ResponseState, int> responseStateRepository, IApprovalAppService approvalService)
+        public ResponseAppService(IRepository<ResponseHistory, int> _repository, IRepository<ResponseState, int> responseStateRepository, IObjectionAppService objectionService, IApprovalAppService approvalService, IAttachmentAppService attachmentService)
         {
             this._repository = _repository;
-            _objectionRepository = objectionRepository;
+            _objectionService = objectionService;
             _responseStateRepository = responseStateRepository;
             _approvalService = approvalService;
+            _attachmentService = attachmentService;
         }
 
         public async Task<ResponseHistoryDto> CreateAsync(ResponseHistoryDto input)
@@ -222,13 +225,45 @@ namespace PWD.Audit.Services
                 response = await _repository.UpdateAsync(response);
             }
 
-            if(input.Status == ResponseStatus.RejectedByMinistry)
+            // Adding Response Attachments
+            if (input.Attachments?.Count > 0)
+            {
+                foreach (var attachment in input.Attachments)
+                {
+                    attachment.ObjectionId = input.ObjectionId;
+                    attachment.ResponseId = response.Id;
+                    attachment.AttachmentType = AttachmentType.ResponseRejected;
+                }
+                // Process attachments to upload folder
+                FileProcessing.PorcessFilesToUploadFolder(input.ObjectionId, input.Attachments.ToList());
+                _attachmentService.InsertBulkAsync(input.Attachments).GetAwaiter().GetResult();
+            }
+
+            if (input.Status == ResponseStatus.RejectedByMinistry)
             {
                 if (latestState != null)
                 {
                     latestState.Note = input.Response;
                     latestState.IsLocked = true;
                     await _responseStateRepository.UpdateAsync(latestState);
+                }
+            }
+
+            if (input.Status == ResponseStatus.Rejected  || input.Status == ResponseStatus.RejectedByMinistry)
+            {
+                var objection = await _objectionService.GetByIdAsync(input.ObjectionId);
+                if (objection != null)
+                {
+                    if (objection.ObjectionType == ObjectionType.NonSFI)
+                    {
+                        objection.ObjectionStatus = ObjectionStatus.RequestedReAnswerFromMinistry;
+                    }
+                    if (objection.ObjectionType == ObjectionType.SFI)
+                    {
+                        objection.ObjectionStatus = ObjectionStatus.RequestedReAnswerFromAGOffice;
+                    }
+
+                    await _objectionService.UpdateAsync(objection);
                 }
             }
 

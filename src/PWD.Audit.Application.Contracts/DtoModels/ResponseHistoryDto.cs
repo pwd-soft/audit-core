@@ -16,6 +16,7 @@ namespace PWD.Audit.DtoModels
         public List<FileDataInput> FileDataInput { get; set; }
         public string User { get; set; }
         public ResponseStatus Status { get; set; }
+        public string MinistryRejectionReason { get; set; } = string.Empty;
 
         public virtual ICollection<ResponseCommentDto> ResponseComments { get; set; } = new List<ResponseCommentDto>();
         public virtual ICollection<ResponseStateDto> ResponseStates { get; set; } = new List<ResponseStateDto>();

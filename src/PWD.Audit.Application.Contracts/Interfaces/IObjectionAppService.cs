@@ -10,6 +10,7 @@ namespace PWD.Audit.Interfaces
     {
         Task<ObjectionDto> CreateAsync(ObjectionDto input);
         Task DeleteAsync(int id);
+        Task<ObjectionDto> GetDetailsByIdAsync(int id);
         Task<ObjectionDto> GetByIdAsync(int id);
         Task<List<ObjectionDto>> GetListAsync();
         Task<ObjectionDto> UpdateAsync(ObjectionDto input);
