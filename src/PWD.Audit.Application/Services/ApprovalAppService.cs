@@ -124,7 +124,6 @@ namespace PWD.Audit.Services
 
         public async Task<PostingDto> UpdatePosting(string userName)
         {
-
             using (var client = new HttpClient())
             {
                 var tokenResponse = await GetToken();
