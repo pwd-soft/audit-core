@@ -11,6 +11,7 @@ namespace PWD.Audit.DtoModels
         public string Post { get; set; }
         public string Note { get; set; }
         public string BCSID { get; set; }
+        public string UniqueKey { get; set; }
     }
 
 }
