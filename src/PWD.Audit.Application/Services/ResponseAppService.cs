@@ -163,6 +163,19 @@ namespace PWD.Audit.Services
 
             var updatedResponse = await _repository.UpdateAsync(response);
 
+            if(input.Attachments.Count > 0)
+            {
+                foreach (var attachment in input.Attachments)
+                {
+                    attachment.ObjectionId = input.ObjectionId;
+                    attachment.ResponseId = response.Id;
+                    attachment.AttachmentType = AttachmentType.Response;
+                }
+                // Process attachments to upload folder
+                FileProcessing.PorcessFilesToUploadFolder(input.ObjectionId, input.Attachments.ToList());
+                _attachmentService.InsertBulkAsync(input.Attachments).GetAwaiter().GetResult();
+            }
+
             return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(response);
         }
 

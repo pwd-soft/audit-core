@@ -1,24 +1,14 @@
-﻿using AutoMapper;
-using Nito.AsyncEx;
-using PWD.Audit.Enum;
+﻿using PWD.Audit.Enum;
 using PWD.Audit.Interfaces;
 using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Volo.Abp.ObjectMapping;
 using PWD.Attendance_Swagger.DtoModels;
-using PWD.Audit.InputDtos;
-using System.IO;
-using System.Net.Mail;
-using System.Text.Json;
 using PWD.Audit.Models;
 using PWD.Audit.Helper;
 
@@ -218,7 +208,15 @@ namespace PWD.Audit.Services
                 responseHistory.ResponseComments = await _responseCommentRepository.GetListAsync(x => x.ResponseHistoryId == responseHistory.Id);
             }
             ;
-            return ObjectMapper.Map<Objection, ObjectionDto>(objection);
+
+            var objectionDto = ObjectMapper.Map<Objection, ObjectionDto>(objection);
+
+            foreach (var responseHistory in objectionDto.ResponseHistories)
+            {
+                responseHistory.Attachments = await _attachmentService.GetListResponseIdAsync(responseHistory.Id, AttachmentType.Response);
+            }
+
+            return objectionDto;
         }
 
         public async Task<List<ObjectionDto>> GetListAsync() => ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(await _repository.GetListAsync());
