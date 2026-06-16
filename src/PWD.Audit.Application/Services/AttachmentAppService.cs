@@ -94,5 +94,20 @@ namespace PWD.Audit.Services
             var convertedAttachments = ObjectMapper.Map<IEnumerable<AttachmentDto>, IEnumerable<PWD.Audit.Models.Attachment>>(newAttachments);
             await _repository.InsertManyAsync(convertedAttachments, true);
         }
+
+        public async Task<List<AttachmentSummaryDto>> GetObjectionAttachmentCount(List<int> ids, AttachmentType type)
+        {
+            var attachments = await _repository.GetQueryableAsync();
+            var data = await attachments
+                .Where(a => ids.Contains(a.ObjectionId) && a.AttachmentType == type)
+                .GroupBy(a => a.ObjectionId)
+                .Select(g => new AttachmentSummaryDto
+                {
+                    ObjectionId = g.Key,
+                    ObjectionCount = g.Count()
+                })
+                .ToListAsync();
+            return data;
+        }
     }
 }

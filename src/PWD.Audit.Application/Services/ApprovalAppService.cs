@@ -402,7 +402,7 @@ namespace PWD.Audit.Services
                 {
                     name = user.Name,
                     id = user.UserId,
-                    userName = user.UserName,                    
+                    userName = user.UserName,
                 };
             }
             using (var client = new HttpClient())
@@ -505,7 +505,7 @@ namespace PWD.Audit.Services
 
                 HttpResponseMessage response =
                     await client.GetAsync($"api/app/organization-unit/office-all-users?userName={userName}");
-                    //await client.GetAsync($"api/app/organization-unit/office-users?userName={userName}");
+                //await client.GetAsync($"api/app/organization-unit/office-users?userName={userName}");
                 if (response.IsSuccessStatusCode)
                 {
                     var responseString = await response.Content.ReadAsStringAsync();
@@ -558,6 +558,7 @@ namespace PWD.Audit.Services
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<bool> UpdatePassword(ChangePass input)
         {
             using (var client = new HttpClient())
@@ -677,8 +678,41 @@ namespace PWD.Audit.Services
 
             return false;
         }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<bool> CheckPassword(ChangePass input)
+        {
+            using (var client = new HttpClient())
+            {
+                var tokenResponse = await GetToken();
+                client.BaseAddress = new Uri(clientUrl);
+                client.SetBearerToken(tokenResponse.AccessToken);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var update = JsonSerializer.Serialize(input); 
+                var requestContent = new StringContent(update, Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await client.PostAsync(($"api/app/user/check-password"), requestContent);
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        var responseString = await response.Content.ReadAsStringAsync();
+                        return Convert.ToBoolean(responseString);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Internal server Error");
+                    return false;
+                }
+            }
+            return false;
+        }
     }
-
-
 
 }

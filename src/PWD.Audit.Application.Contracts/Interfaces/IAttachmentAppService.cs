@@ -14,6 +14,7 @@ namespace PWD.Audit.Services
         Task<List<AttachmentDto>> GetListResponseIdAsync(int id, AttachmentType type);
         Task<AttachmentDto> UpdateAsync(AttachmentDto input);
         Task InsertBulkAsync(IEnumerable<AttachmentDto> newAttachments);
+        Task<List<AttachmentSummaryDto>> GetObjectionAttachmentCount(List<int> ids, AttachmentType type);
 
         //Task<List<AttachmentDto>> GetListAsync();
         //Task<List<AttachmentDto>> GetListByObjectionIdAsync(int objectionId);

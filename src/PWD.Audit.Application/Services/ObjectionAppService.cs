@@ -252,8 +252,10 @@ namespace PWD.Audit.Services
 
             var objectionList = queryableList.ToList();
 
-            objectionList = queryableList.Skip(filterCriteria.Offset)
-                .Take(filterCriteria.Limit).ToList();
+            objectionList = queryableList
+                .Skip(filterCriteria.Offset)
+                .Take(filterCriteria.Limit)
+                .ToList();
 
             return ObjectMapper.Map<List<Objection>, List<ObjectionDto>>(objectionList);
         }
@@ -292,6 +294,23 @@ namespace PWD.Audit.Services
                 .Take(filterCriteria.Limit);
 
             objectionList.ListData = ObjectMapper.Map<IQueryable<Objection>, List<ObjectionDto>>(queryableList);
+            var oIds = objectionList.ListData.Select(o => o.Id).ToList();
+            var data = await _attachmentService.GetObjectionAttachmentCount(oIds, AttachmentType.Objection);
+
+            if (data?.Count > 0)
+            {
+                foreach (var item in data)
+                {
+                    if (item.ObjectionCount > 0)
+                    {
+                        var objectionDto = objectionList.ListData.FirstOrDefault(o => o.Id == item.ObjectionId);
+                        if (objectionDto != null)
+                        {
+                            objectionDto.HasAttachment = true;
+                        }
+                    }
+                }
+            }
 
             return objectionList;
         }
