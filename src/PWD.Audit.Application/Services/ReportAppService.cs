@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using PWD.Attendance_Swagger.DtoModels;
 using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
@@ -14,6 +15,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace PWD.Audit.Services
 {
+    [Authorize]
     public class ReportAppService : ApplicationService, IReportAppService
     {
         private readonly IRepository<Summary, int> _repository;

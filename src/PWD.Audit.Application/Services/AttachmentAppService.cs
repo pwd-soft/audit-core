@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Asn1.Ocsp;
 using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
@@ -17,6 +18,7 @@ using Volo.Abp.ObjectMapping;
 
 namespace PWD.Audit.Services
 {
+    [Authorize]
     public class AttachmentAppService : ApplicationService, IAttachmentAppService
     {
         private readonly IRepository<PWD.Audit.Models.Attachment, int> _repository;

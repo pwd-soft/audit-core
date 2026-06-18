@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
 using PWD.Audit.Interfaces;
@@ -13,6 +14,7 @@ using Volo.Abp.ObjectMapping;
 
 namespace PWD.Audit.Services
 {
+    [Authorize]
     public class AssociateAppService : ApplicationService, IAssociateAppService
     {
         private readonly IRepository<Associate, int> _repository;

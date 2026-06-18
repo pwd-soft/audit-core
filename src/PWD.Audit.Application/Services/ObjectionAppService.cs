@@ -11,9 +11,11 @@ using Volo.Abp.Domain.Repositories;
 using PWD.Attendance_Swagger.DtoModels;
 using PWD.Audit.Models;
 using PWD.Audit.Helper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PWD.Audit.Services
 {
+    [Authorize]
     public class ObjectionAppService : ApplicationService, IObjectionAppService
     {
         private readonly IRepository<Objection, int> _repository;

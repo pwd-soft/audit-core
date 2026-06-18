@@ -1,4 +1,5 @@
-﻿using PWD.Audit.DtoModels;
+﻿using Microsoft.AspNetCore.Authorization;
+using PWD.Audit.DtoModels;
 using PWD.Audit.Interfaces;
 using PWD.Audit.Models;
 using System;
@@ -12,6 +13,7 @@ using Volo.Abp.ObjectMapping;
 
 namespace PWD.Audit.Services
 {
+    [Authorize]
     public class YearlyObjectionAppService : ApplicationService, IYearlyObjectionAppService
     {
         private readonly IRepository<YearlyObjection, int> _repository;

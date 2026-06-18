@@ -1,4 +1,5 @@
-﻿using PWD.Audit.DtoModels;
+﻿using Microsoft.AspNetCore.Authorization;
+using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
 using PWD.Audit.Interfaces;
 using PWD.Audit.Models;
@@ -12,6 +13,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace PWD.Audit.Services
 {
+    [Authorize]
     public class ResponseCommentAppService : ApplicationService, IResponseCommentAppService
     {
         private readonly IRepository<ResponseComment, int> _repository;

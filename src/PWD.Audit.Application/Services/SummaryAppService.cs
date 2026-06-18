@@ -1,4 +1,5 @@
-﻿using PWD.Audit.DtoModels;
+﻿using Microsoft.AspNetCore.Authorization;
+using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
 using PWD.Audit.Enum;
 using PWD.Audit.InputDtos;
@@ -14,6 +15,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace PWD.Audit.Services
 {
+    [Authorize]
     public class SummaryAppService : ApplicationService, ISummaryAppService
     {
         private readonly IRepository<Summary, int> _repository;

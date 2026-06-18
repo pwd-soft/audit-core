@@ -1,4 +1,5 @@
-﻿using PWD.Audit.DtoModels;
+﻿using Microsoft.AspNetCore.Authorization;
+using PWD.Audit.DtoModels;
 using PWD.Audit.Entities;
 using PWD.Audit.Enum;
 using PWD.Audit.Helper;
@@ -18,6 +19,7 @@ using Volo.Abp.ObjectMapping;
 
 namespace PWD.Audit.Services
 {
+    [Authorize]
     public class ResponseAppService : ApplicationService, IResponseAppService
     {
         private readonly IRepository<ResponseHistory, int> _repository;
