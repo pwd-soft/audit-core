@@ -521,24 +521,28 @@ namespace PWD.Audit.Controllers
         ////}
 
 
-        //[HttpGet, DisableRequestSizeLimit]
-        //[ActionName("Download")]
-        //public async Task<IActionResult> Download([FromQuery] string fileUrl, string fileName)
-        //{
-        //    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", fileUrl);
+        [HttpGet, DisableRequestSizeLimit]
+        [ActionName("Download")]
+        public async Task<IActionResult> Download([FromQuery] string fileUrl, string fileName)
+        {
+            if (fileUrl.Contains("Temp_Uploads"))
+            {
+                fileUrl = fileUrl.Replace("Temp_Uploads", "Uploaded_Documents");
+            }
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", fileUrl);
 
-        //    if (!System.IO.File.Exists(filePath))
-        //        return NotFound();
+            if (!System.IO.File.Exists(filePath))
+                return NotFound();
 
-        //    var memory = new MemoryStream();
-        //    await using (var stream = new FileStream(filePath, FileMode.Open))
-        //    {
-        //        await stream.CopyToAsync(memory);
-        //    }
-        //    memory.Position = 0;
+            var memory = new MemoryStream();
+            await using (var stream = new FileStream(filePath, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
 
-        //    return File(memory, GetContentType(filePath), fileName);
-        //}
+            return File(memory, GetContentType(filePath), fileName);
+        }
 
 
         //#region private methods
@@ -586,18 +590,18 @@ namespace PWD.Audit.Controllers
         //    }
         //}
 
-        //private string GetContentType(string path)
-        //{
-        //    var provider = new FileExtensionContentTypeProvider();
-        //    string contentType;
+        private string GetContentType(string path)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            string contentType;
 
-        //    if (!provider.TryGetContentType(path, out contentType))
-        //    {
-        //        contentType = "application/octet-stream";
-        //    }
+            if (!provider.TryGetContentType(path, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
 
-        //    return contentType;
-        //}
+            return contentType;
+        }
 
         //private string DateBn(DateTime? SourceValue)
 
