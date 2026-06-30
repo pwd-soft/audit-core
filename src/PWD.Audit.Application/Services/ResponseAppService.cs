@@ -51,6 +51,19 @@ namespace PWD.Audit.Services
             //updateAttachmentField.Attachments = JsonSerializer.Serialize(input.FileDataInput);
             //await _repository.UpdateAsync(updateAttachmentField);
 
+            if (input.Attachments.Count > 0)
+            {
+                foreach (var attachment in input.Attachments)
+                {
+                    attachment.ObjectionId = input.ObjectionId;
+                    attachment.ResponseId = newresponseHistory.Id;
+                    attachment.AttachmentType = AttachmentType.Response;
+                }
+                // Process attachments to upload folder
+                FileProcessing.PorcessFilesToUploadFolder(input.ObjectionId, input.Attachments.ToList());
+                _attachmentService.InsertBulkAsync(input.Attachments).GetAwaiter().GetResult();
+            }
+
             var userInfo = await _approvalService.GetPosting(input.User);
 
             var responseState = new ResponseState
