@@ -18,12 +18,14 @@ namespace PWD.Audit.DtoModels
         public Guid? OrgUniId { get; set; }
         public Guid? UserId { get; set; }
         public string UserName { get; set; }
+        public string OfficeCode { get; set; }
+        public string PhoneNumber { get; set; }
 
     }
     public class PostingConsumeDto
     {
-        public Guid id { get; set; }
-        public Guid orgUniId { get; set; }
+        public Guid? id { get; set; }
+        public Guid? orgUniId { get; set; }
         public int postingId { get; set; }
         public int employeeId { get; set; }
         public string name { get; set; }
@@ -34,6 +36,8 @@ namespace PWD.Audit.DtoModels
         public string office { get; set; }
         public string officeBn { get; set; }
         public string userName { get; set; }
+        public string officeCode { get; set; }
+        public string phoneNumber { get; set; }
 
     }
     public class OrganizationUnitDto 

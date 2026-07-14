@@ -17,6 +17,7 @@ using System.Xml.Linq;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Auditing;
 using Volo.Abp.Domain.Repositories;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace PWD.Audit.Services
 {
@@ -225,23 +226,90 @@ namespace PWD.Audit.Services
             }
             return new PostingDto();
         }
+        //[AllowAnonymous]
+        //public async Task<List<PostingDto>> GetPostingListById(List<int> ids)
+        //{
+        //    var idString = "";
+        //    ids.ForEach(i => idString += "idList=" + i + "&");
+        //    idString = idString.Remove(idString.Length - 1);
+
+        //    using (var client = new HttpClient())
+        //    {
+        //        var tokenResponse = await GetToken();
+        //        client.BaseAddress = new Uri(clientUrl);
+        //        client.SetBearerToken(tokenResponse.AccessToken);
+        //        client.DefaultRequestHeaders.Accept.Clear();
+        //        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        //        //GET Method
+        //        HttpResponseMessage response =
+        //            await client.GetAsync($"api/app/posting/posting-list?{idString}");
+        //        if (response.IsSuccessStatusCode)
+        //        {
+        //            try
+        //            {
+        //                var postString = await response.Content.ReadAsStringAsync();
+        //                var posts = JsonSerializer.Deserialize<List<PostingConsumeDto>>(postString);
+        //                //var resultList = ObjectMapper.Map<List<PostingConsumeDto>, List<PostingDto>>(posts); ;
+
+        //                var resultList = new List<PostingDto>();
+        //                posts.ForEach(post =>
+        //                {
+        //                    var result = new PostingDto()
+        //                    {
+        //                        Post = post.post,
+        //                        Designation = post.designation,
+        //                        DesignationBn = post.designationBn,
+        //                        EmployeeId = post.employeeId,
+        //                        UserId = post.id,
+        //                        Name = post.name,
+        //                        NameBn = post.nameBn,
+        //                        Office = post.office,
+        //                        OfficeBn = post.officeBn,
+        //                        PostingId = post.postingId,
+        //                        OrgUniId = post.orgUniId,
+        //                        UserName = post.userName,
+        //                    };
+        //                    resultList.Add(result);
+        //                });
+
+        //                return resultList;
+        //                // put the code here that may raise exceptions
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Console.WriteLine(ex.Message);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            Console.WriteLine("Internal server Error");
+        //        }
+        //    }
+        //    return new List<PostingDto>();
+        //}
+
         [AllowAnonymous]
+        [HttpPost]
         public async Task<List<PostingDto>> GetPostingListById(List<int> ids)
+
         {
-            var idString = "";
-            ids.ForEach(i => idString += "idList=" + i + "&");
-            idString = idString.Remove(idString.Length - 1);
+
+            //var idString = "";//ids.ForEach(i => idString += "idList=" + i + "&");//idString = idString.Remove(idString.Length - 1);
+            var update = JsonSerializer.Serialize(ids);
+            var requestContent = new StringContent(update, Encoding.UTF8, "application/json");
 
             using (var client = new HttpClient())
             {
-                var tokenResponse = await GetToken();
+
+                //var tokenResponse = await GetToken();//client.SetBearerToken(tokenResponse.AccessToken);
+                
                 client.BaseAddress = new Uri(clientUrl);
-                client.SetBearerToken(tokenResponse.AccessToken);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                //GET Method
-                HttpResponseMessage response =
-                    await client.GetAsync($"api/app/posting/posting-list?{idString}");
+
+                //GET Method//PostingList
+                HttpResponseMessage response = await client.PostAsync($"api/app/posting/PostingList", requestContent);
+
                 if (response.IsSuccessStatusCode)
                 {
                     try
@@ -255,6 +323,7 @@ namespace PWD.Audit.Services
                         {
                             var result = new PostingDto()
                             {
+
                                 Post = post.post,
                                 Designation = post.designation,
                                 DesignationBn = post.designationBn,
@@ -267,11 +336,13 @@ namespace PWD.Audit.Services
                                 PostingId = post.postingId,
                                 OrgUniId = post.orgUniId,
                                 UserName = post.userName,
+                                OfficeCode = post.officeCode,
+                                PhoneNumber = post.phoneNumber,
                             };
                             resultList.Add(result);
                         });
-
                         return resultList;
+
                         // put the code here that may raise exceptions
                     }
                     catch (Exception ex)
@@ -279,12 +350,18 @@ namespace PWD.Audit.Services
                         Console.WriteLine(ex.Message);
                     }
                 }
+
                 else
                 {
+
                     Console.WriteLine("Internal server Error");
+
                 }
+
             }
+
             return new List<PostingDto>();
+
         }
 
         [AllowAnonymous]
@@ -690,7 +767,7 @@ namespace PWD.Audit.Services
                 client.SetBearerToken(tokenResponse.AccessToken);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var update = JsonSerializer.Serialize(input); 
+                var update = JsonSerializer.Serialize(input);
                 var requestContent = new StringContent(update, Encoding.UTF8, "application/json");
                 HttpResponseMessage response = await client.PostAsync(($"api/app/user/check-password"), requestContent);
                 if (response.IsSuccessStatusCode)
