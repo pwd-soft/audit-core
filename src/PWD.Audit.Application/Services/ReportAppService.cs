@@ -8,6 +8,7 @@ using PWD.Audit.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
@@ -24,11 +25,12 @@ namespace PWD.Audit.Services
         private readonly IRepository<SummaryLine, int> _summaryLineRepository;
         private readonly IApprovalAppService _approvalAppService;
         private readonly IYearlyObjectionAppService _yearlyObjectionAppService;
+        private readonly IAttachmentAppService _attachmentService;
 
 
         private const string AuditMonitoringOfficeRole = "AuditOfficeAdmin";
 
-        public ReportAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> summaryLineRepository, IRepository<Objection, int> objectionRepository, IObjectionAppService objectionService, IApprovalAppService approvalAppService, IYearlyObjectionAppService yearlyObjectionAppService)
+        public ReportAppService(IRepository<Summary, int> repository, IRepository<SummaryLine, int> summaryLineRepository, IRepository<Objection, int> objectionRepository, IObjectionAppService objectionService, IApprovalAppService approvalAppService, IYearlyObjectionAppService yearlyObjectionAppService, IAttachmentAppService attachmentService)
         {
             _repository = repository;
             _summaryLineRepository = summaryLineRepository;
@@ -36,6 +38,7 @@ namespace PWD.Audit.Services
             _objectionRepository = objectionRepository;
             _approvalAppService = approvalAppService;
             _yearlyObjectionAppService = yearlyObjectionAppService;
+            _attachmentService = attachmentService;
         }
 
         public async Task<GenericListDto<ObjectionReportDto>> DetailedReport(ReportFilterModel reportFilter)
@@ -60,6 +63,23 @@ namespace PWD.Audit.Services
                 ObjectionReportDto objectionReport = new ObjectionReportDto();
                 objectionReport.OrgUnit = office;
                 objectionReport.Objections = await GetObjectionsByOffice(office.code, reportFilter);
+                var oIds = objectionReport.Objections.Select(o => o.Id).ToList();
+                var data = await _attachmentService.GetObjectionAttachmentCount(oIds, AttachmentType.Objection);
+
+                if (data?.Count > 0)
+                {
+                    foreach (var item in data)
+                    {
+                        if (item.ObjectionCount > 0)
+                        {
+                            var objectionDto = objectionReport.Objections.FirstOrDefault(o => o.Id == item.ObjectionId);
+                            if (objectionDto != null)
+                            {
+                                objectionDto.HasAttachment = true;
+                            }
+                        }
+                    }
+                }
                 processedObjections.Add(objectionReport);
             }
 
