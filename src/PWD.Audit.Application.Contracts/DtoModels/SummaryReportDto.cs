@@ -8,6 +8,7 @@ namespace PWD.Audit.DtoModels
     {
         public int Serial { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
+        public string Layer { get; set; } = string.Empty;
         public int PreviousObjectionNumber { get; set; } = 0;
         public double PreviousObjectionAmount { get; set; } = 0.0;
         public int CurrentObjectionNumber { get; set; } = 0;

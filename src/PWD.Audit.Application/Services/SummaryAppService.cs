@@ -98,10 +98,11 @@ namespace PWD.Audit.Services
 
         public async Task<SummaryDto> GetByOffice(string officeCode)
         {
-            var objections = await _objectionRepository.GetListAsync(x => x.OfficeCode == officeCode);
-            var sfi = objections.Where(o => o.ObjectionType == ObjectionType.SFI).ToList();
-            var nsfi = objections.Where(o => o.ObjectionType == ObjectionType.NonSFI).ToList();
-            var dr = objections.Where(o => o.ObjectionType == ObjectionType.Draft).ToList();
+            var objectionQuery = await _objectionRepository.GetQueryableAsync();
+            var objections = objectionQuery.Where(x => x.OfficeCode == officeCode);
+            var sfi = objections.Where(o => o.ObjectionType == ObjectionType.SFI);
+            var nsfi = objections.Where(o => o.ObjectionType == ObjectionType.NonSFI);
+            var dr = objections.Where(o => o.ObjectionType == ObjectionType.Draft);
             var sfiLine = new SummaryLineDto()
             {
                 Count = sfi.Count(),
@@ -150,6 +151,76 @@ namespace PWD.Audit.Services
             return result;
         }
 
+        public async Task<YearlySummaryDto> GetYearlySummary(string officeCode)
+        {
+            var objectionQuery = await _objectionRepository.GetQueryableAsync();
+            var objections = objectionQuery.Where(x => x.OfficeCode == officeCode);
+            var finacialYears = objections.Select(x => x.FinancialYear).Distinct().ToList();
+
+            var result = new YearlySummaryDto() { OfficeCode = officeCode };
+
+            foreach (var year in finacialYears)
+            {
+                result.YearlySummaryDetails ??= new List<YearlySummaryDetailsDto>();
+                YearlySummaryDetailsDto yearlySummaryDetail = new YearlySummaryDetailsDto();
+                yearlySummaryDetail.FinancialYear = year;
+
+                var yearlyObjections = objections.Where(x => x.FinancialYear == year);
+                var sfi = yearlyObjections.Where(o => o.ObjectionType == ObjectionType.SFI);
+                var nsfi = yearlyObjections.Where(o => o.ObjectionType == ObjectionType.NonSFI);
+                var dr = yearlyObjections.Where(o => o.ObjectionType == ObjectionType.Draft);
+                
+                // Process the yearly objections and create YearlySummaryDetailsDto
+                var sfiLine = new SummaryLineDto()
+                {
+                    Count = sfi.Count(),
+                    BroadSheet = sfi.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetAnswered),
+                    Resolved = sfi.Count(x => x.ObjectionStatus == ObjectionStatus.Resolved),
+                    NonBroadSheet = sfi.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
+                    Value = sfi.Sum(x => x.Value),
+                    Type = ObjectionType.SFI,
+                    TypeName = "এসএফআই",
+                };
+                var nsfiLine = new SummaryLineDto()
+                {
+                    Count = nsfi.Count(),
+                    BroadSheet = nsfi.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetAnswered),
+                    Resolved = nsfi.Count(x => x.ObjectionStatus == ObjectionStatus.Resolved),
+                    NonBroadSheet = nsfi.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
+                    Value = nsfi.Sum(x => x.Value),
+                    Type = ObjectionType.NonSFI,
+                    TypeName = "নন এসএফআই",
+                };
+                var drLine = new SummaryLineDto()
+                {
+                    Count = dr.Count(),
+                    BroadSheet = dr.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetAnswered),
+                    Resolved = dr.Count(x => x.ObjectionStatus == ObjectionStatus.Resolved),
+                    NonBroadSheet = dr.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
+                    Value = dr.Sum(x => x.Value),
+                    Type = ObjectionType.Draft,
+                    TypeName = "ড্রাফট",
+                };
+                var totalLine = new SummaryLineDto()
+                {
+                    Count = objections.Count(),
+                    BroadSheet = objections.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetAnswered),
+                    Resolved = objections.Count(x => x.ObjectionStatus == ObjectionStatus.Resolved),
+                    NonBroadSheet = objections.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
+                    Value = objections.Sum(x => x.Value),
+                    Type = Enum.ObjectionType.Draft,
+                    TypeName = "মোট",
+                };
+                yearlySummaryDetail.SummaryLines.Add(sfiLine);
+                yearlySummaryDetail.SummaryLines.Add(nsfiLine);
+                yearlySummaryDetail.SummaryLines.Add(drLine);
+                yearlySummaryDetail.SummaryLines.Add(totalLine);
+                result.YearlySummaryDetails.Add(yearlySummaryDetail);
+            }
+
+            return result;
+        }
+
         public async Task<List<SummaryDto>> GetListAsync() => ObjectMapper.Map<List<Summary>, List<SummaryDto>>(await _repository.GetListAsync());
 
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
@@ -192,17 +263,17 @@ namespace PWD.Audit.Services
             foreach (var id in OfficeIds)
             {
                 var result = new List<SummaryReportDto>();
-                
+
                 switch (subType)
                 {
                     case SummaryReportSubType.Zonewise:
                         result = await GetZoneData(id, type);
-                        break; 
+                        break;
                     case SummaryReportSubType.Circlewise:
                         result = await GetCircleData(id, type);
                         break;
                 }
-                
+
                 Data.AddRange(result);
             }
 
@@ -214,7 +285,9 @@ namespace PWD.Audit.Services
             List<SummaryReportDto> zoneSummaryList = new List<SummaryReportDto>();
             var objectionList = await _objectionAppService.GetListByOfficeCodeAsync(officeCode);
             var summary = AssignData(objectionList);
-            summary.Name = offices.FirstOrDefault(o => o.code == officeCode).displayNameBn;
+            var office = offices.FirstOrDefault(o => o.code == officeCode);
+            summary.Name = office?.displayNameBn;
+            summary.Layer = office?.layer;
             zoneSummaryList.Add(summary);
 
             var circles = offices.Where(o => o.parentCode == officeCode).ToList();
@@ -245,7 +318,9 @@ namespace PWD.Audit.Services
 
             var circleObjectionList = await _objectionAppService.GetListByOfficeCodeAsync(officeCode);
             var circleSummary = AssignData(circleObjectionList);
-            circleSummary.Name = offices.FirstOrDefault(o => o.code == officeCode).displayNameBn;
+            var office = offices.FirstOrDefault(o => o.code == officeCode);
+            circleSummary.Name = office?.displayNameBn;
+            circleSummary.Layer = office?.layer;
             circleSummaryList.Add(circleSummary);
 
             var divisions = offices.Where(o => o.parentCode == officeCode).ToList();
@@ -274,7 +349,8 @@ namespace PWD.Audit.Services
             var divisionInfo = offices.FirstOrDefault(o => o.code == officeCode);
             var objectionList = await _objectionAppService.GetListByOfficeCodeAsync(officeCode);
             var summary = AssignData(objectionList);
-            summary.Name = divisionInfo.displayNameBn;
+            summary.Name = divisionInfo?.displayNameBn;
+            summary.Layer = divisionInfo?.layer;
 
             if (type == SummaryReportType.Combined)
             {
@@ -298,7 +374,10 @@ namespace PWD.Audit.Services
             {
                 var objections = await _objectionAppService.GetListByOfficeCodeAsync(item);
                 var summary = AssignData(objections);
-                summary.Name = offices.FirstOrDefault(o => o.code == item).displayNameBn;
+
+                var office = offices.FirstOrDefault(o => o.code == item);
+                summary.Name = office?.displayNameBn;
+                summary.Layer = office?.layer;
                 officeSummaryList.Add(summary);
             }
 

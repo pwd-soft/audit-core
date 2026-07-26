@@ -10,5 +10,6 @@ namespace PWD.Audit.Interfaces
         Task DeleteAsync(int id);
         Task<List<SummaryDto>> GetListAsync();
         Task<SummaryDto> UpdateAsync(SummaryDto input);
+        Task<YearlySummaryDto> GetYearlySummary(string officeCode);
     }
 }
