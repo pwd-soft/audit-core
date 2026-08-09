@@ -224,7 +224,7 @@ namespace PWD.Audit.Services
         public async Task<List<SummaryDto>> GetListAsync() => ObjectMapper.Map<List<Summary>, List<SummaryDto>>(await _repository.GetListAsync());
 
         public async Task DeleteAsync(int id) => await _repository.DeleteAsync(id);
-
+        //2018-07
         public async Task<List<SummaryReportDto>> GenerateSummaryReport(SummaryReportInputDto summaryReportCriteria)
         {
             List<SummaryReportDto> SummaryReportData = new List<SummaryReportDto>();
@@ -237,11 +237,11 @@ namespace PWD.Audit.Services
                 case SummaryReportType.Detailed:
                     if (summaryReportCriteria.Offices.Count > 0)
                     {
-                        SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, summaryReportCriteria.Type, summaryReportCriteria.SubType);
+                        SummaryReportData = await ProcessSummaryData(summaryReportCriteria.Offices, summaryReportCriteria.Type, summaryReportCriteria.SubType, summaryReportCriteria.Month);
                     }
                     break;
                 case SummaryReportType.Officewise:
-                    SummaryReportData = await GetOfficeData(summaryReportCriteria.Offices);
+                    SummaryReportData = await GetOfficeData(summaryReportCriteria.Offices, summaryReportCriteria.Month);
                     break;
             }
 
@@ -256,7 +256,7 @@ namespace PWD.Audit.Services
             return SummaryReportData;
         }
 
-        private async Task<List<SummaryReportDto>> ProcessSummaryData(List<string> OfficeIds, SummaryReportType type, SummaryReportSubType subType)
+        private async Task<List<SummaryReportDto>> ProcessSummaryData(List<string> OfficeIds, SummaryReportType type, SummaryReportSubType subType, string month)
         {
             List<SummaryReportDto> Data = new List<SummaryReportDto>();
 
@@ -267,10 +267,10 @@ namespace PWD.Audit.Services
                 switch (subType)
                 {
                     case SummaryReportSubType.Zonewise:
-                        result = await GetZoneData(id, type);
+                        result = await GetZoneData(id, type, month);
                         break;
                     case SummaryReportSubType.Circlewise:
-                        result = await GetCircleData(id, type);
+                        result = await GetCircleData(id, type, month);
                         break;
                 }
 
@@ -280,11 +280,11 @@ namespace PWD.Audit.Services
             return Data;
         }
 
-        private async Task<List<SummaryReportDto>> GetZoneData(string officeCode, SummaryReportType type)
+        private async Task<List<SummaryReportDto>> GetZoneData(string officeCode, SummaryReportType type, string month)
         {
             List<SummaryReportDto> zoneSummaryList = new List<SummaryReportDto>();
             var objectionList = await _objectionAppService.GetListByOfficeCodeAsync(officeCode);
-            var summary = AssignData(objectionList);
+            var summary = AssignData(objectionList, month);
             var office = offices.FirstOrDefault(o => o.code == officeCode);
             summary.Name = office?.displayNameBn;
             summary.Layer = office?.layer;
@@ -296,7 +296,7 @@ namespace PWD.Audit.Services
 
             foreach (var item in circles)
             {
-                var circleSummary = await GetCircleData(item.code, type);
+                var circleSummary = await GetCircleData(item.code, type, month);
 
                 if (type == SummaryReportType.Combined)
                 {
@@ -312,12 +312,12 @@ namespace PWD.Audit.Services
             return zoneSummaryList;
         }
 
-        private async Task<List<SummaryReportDto>> GetCircleData(string officeCode, SummaryReportType type)
+        private async Task<List<SummaryReportDto>> GetCircleData(string officeCode, SummaryReportType type, string month)
         {
             List<SummaryReportDto> circleSummaryList = new List<SummaryReportDto>();
 
             var circleObjectionList = await _objectionAppService.GetListByOfficeCodeAsync(officeCode);
-            var circleSummary = AssignData(circleObjectionList);
+            var circleSummary = AssignData(circleObjectionList, month);
             var office = offices.FirstOrDefault(o => o.code == officeCode);
             circleSummary.Name = office?.displayNameBn;
             circleSummary.Layer = office?.layer;
@@ -327,7 +327,7 @@ namespace PWD.Audit.Services
 
             foreach (var item in divisions)
             {
-                var divisionSummary = await GetDivisionData(item.code, type);
+                var divisionSummary = await GetDivisionData(item.code, type, month);
 
                 if (type == SummaryReportType.Combined)
                 {
@@ -343,12 +343,12 @@ namespace PWD.Audit.Services
             return circleSummaryList;
         }
 
-        private async Task<List<SummaryReportDto>> GetDivisionData(string officeCode, SummaryReportType type)
+        private async Task<List<SummaryReportDto>> GetDivisionData(string officeCode, SummaryReportType type, string month)
         {
             List<SummaryReportDto> divisionSummaryList = new List<SummaryReportDto>();
             var divisionInfo = offices.FirstOrDefault(o => o.code == officeCode);
             var objectionList = await _objectionAppService.GetListByOfficeCodeAsync(officeCode);
-            var summary = AssignData(objectionList);
+            var summary = AssignData(objectionList, month);
             summary.Name = divisionInfo?.displayNameBn;
             summary.Layer = divisionInfo?.layer;
 
@@ -367,13 +367,13 @@ namespace PWD.Audit.Services
             return divisionSummaryList;
         }
 
-        private async Task<List<SummaryReportDto>> GetOfficeData(List<string> OfficeIds)
+        private async Task<List<SummaryReportDto>> GetOfficeData(List<string> OfficeIds, string month)
         {
             var officeSummaryList = new List<SummaryReportDto>();
             foreach (var item in OfficeIds)
             {
                 var objections = await _objectionAppService.GetListByOfficeCodeAsync(item);
-                var summary = AssignData(objections);
+                var summary = AssignData(objections, month);
 
                 var office = offices.FirstOrDefault(o => o.code == item);
                 summary.Name = office?.displayNameBn;
@@ -384,10 +384,15 @@ namespace PWD.Audit.Services
             return officeSummaryList;
         }
 
-        private SummaryReportDto AssignData(List<ObjectionDto> list)
+        private SummaryReportDto AssignData(List<ObjectionDto> list, string month)
         {
-            var currentDay = DateTime.Today;
-            var firstDayOfCurrentMonth = new DateTime(currentDay.Year, currentDay.Month, 1);
+            //var currentDay = DateTime.Today;
+            //var firstDayOfCurrentMonth = new DateTime(currentDay.Year, currentDay.Month, 1);
+            //var firstDayOfPreviousMonth = firstDayOfCurrentMonth.AddMonths(-1);
+            //var lastDayOfPreviousMonth = firstDayOfCurrentMonth.AddDays(-1);
+            var numbers = Array.ConvertAll(month.Split('-'), int.Parse).ToList();
+            //var currentDay = DateTime.Today;
+            var firstDayOfCurrentMonth = new DateTime(numbers[0], numbers[1], 1);
             var firstDayOfPreviousMonth = firstDayOfCurrentMonth.AddMonths(-1);
             var lastDayOfPreviousMonth = firstDayOfCurrentMonth.AddDays(-1);
 
@@ -408,8 +413,10 @@ namespace PWD.Audit.Services
             summary.PreviousBroadsheetNumber = previousMonthData.Count(p => p.ObjectionStatus == ObjectionStatus.BroadSheetAnswered);
             summary.UnsetteledBroadsheetNumber = list.Count - list.Count(l => l.ObjectionStatus == ObjectionStatus.Resolved) - list.Count(l => l.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered);
 
-            summary.CurrentObjectionSettlementNumber = currentMonthData.Count(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay);
-            summary.CurrentObjectionSettlementAmount = currentMonthData.Where(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay).Sum(s => s.Value);
+            //summary.CurrentObjectionSettlementNumber = currentMonthData.Count(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay);
+            //summary.CurrentObjectionSettlementAmount = currentMonthData.Where(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay).Sum(s => s.Value);
+            summary.CurrentObjectionSettlementNumber = currentMonthData.Count(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= firstDayOfCurrentMonth);
+            summary.CurrentObjectionSettlementAmount = currentMonthData.Where(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= firstDayOfCurrentMonth).Sum(s => s.Value);
 
             summary.NonSfiNumber = list.Count(l => l.ObjectionType == ObjectionType.NonSFI) - list.Count(l => l.ObjectionType == ObjectionType.NonSFI && l.MemoNumber is not null);
             summary.SfiNumber = list.Count(l => l.ObjectionType == ObjectionType.SFI) - list.Count(l => l.ObjectionType == ObjectionType.SFI && l.MemoNumber is not null);
@@ -419,6 +426,42 @@ namespace PWD.Audit.Services
 
             return summary;
         }
+        
+        //private SummaryReportDto AssignData(List<ObjectionDto> list)
+        //{
+        //    var currentDay = DateTime.Today;
+        //    var firstDayOfCurrentMonth = new DateTime(currentDay.Year, currentDay.Month, 1);
+        //    var firstDayOfPreviousMonth = firstDayOfCurrentMonth.AddMonths(-1);
+        //    var lastDayOfPreviousMonth = firstDayOfCurrentMonth.AddDays(-1);
+
+        //    var previousMonthData = list.Where(l => l.ObjectionDate >= firstDayOfPreviousMonth && l.ObjectionDate <= lastDayOfPreviousMonth).ToList();
+        //    var currentMonthData = list.Where(l => l.ObjectionDate >= firstDayOfCurrentMonth).ToList();
+
+        //    var summary = new SummaryReportDto();
+
+        //    summary.PreviousObjectionNumber = previousMonthData.Count();
+        //    summary.PreviousObjectionAmount = previousMonthData.Sum(p => p.Value);
+
+        //    summary.CurrentObjectionNumber = currentMonthData.Count();
+        //    summary.CurrentObjectionAmount = currentMonthData.Sum(p => p.Value);
+
+        //    summary.SubTotalObjectionNumber = summary.PreviousObjectionNumber + summary.CurrentObjectionNumber;
+        //    summary.SubTotalObjectionAmount = summary.PreviousObjectionAmount + summary.CurrentObjectionAmount;
+
+        //    summary.PreviousBroadsheetNumber = previousMonthData.Count(p => p.ObjectionStatus == ObjectionStatus.BroadSheetAnswered);
+        //    summary.UnsetteledBroadsheetNumber = list.Count - list.Count(l => l.ObjectionStatus == ObjectionStatus.Resolved) - list.Count(l => l.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered);
+
+        //    summary.CurrentObjectionSettlementNumber = currentMonthData.Count(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay);
+        //    summary.CurrentObjectionSettlementAmount = currentMonthData.Where(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay).Sum(s => s.Value);
+
+        //    summary.NonSfiNumber = list.Count(l => l.ObjectionType == ObjectionType.NonSFI) - list.Count(l => l.ObjectionType == ObjectionType.NonSFI && l.MemoNumber is not null);
+        //    summary.SfiNumber = list.Count(l => l.ObjectionType == ObjectionType.SFI) - list.Count(l => l.ObjectionType == ObjectionType.SFI && l.MemoNumber is not null);
+        //    summary.DraftNumber = list.Count(l => l.ObjectionType == ObjectionType.Draft) - list.Count(l => l.ObjectionType == ObjectionType.Draft && l.MemoNumber is not null);
+        //    summary.TotalObjectionNumber = summary.NonSfiNumber + summary.SfiNumber + summary.DraftNumber;
+        //    summary.TotalObjectionAmount = list.Where(l => l.MemoNumber == null).Sum(s => s.Value);
+
+        //    return summary;
+        //}
 
         private List<SummaryReportDto> CombineData(List<SummaryReportDto> destination, List<SummaryReportDto> source)
         {
@@ -480,6 +523,12 @@ namespace PWD.Audit.Services
         //        item.OfficeCode = offices.FirstOrDefault(o => o.id == item.OfficeId).code;
         //    }
         //    await _officeUserRepo.UpdateManyAsync(officeUsers, true);
+        //}
+
+        //public Task<bool> Test(string month)
+        //{
+        //    var numbers = Array.ConvertAll(month.Split('-'), int.Parse).ToList();
+        //    return Task.FromResult(true);
         //}
     }
 }

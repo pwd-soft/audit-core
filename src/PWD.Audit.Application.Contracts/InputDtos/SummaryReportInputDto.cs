@@ -10,5 +10,6 @@ namespace PWD.Audit.InputDtos
         public SummaryReportType Type { get; set; }
         public SummaryReportSubType SubType { get; set; }
         public List<string> Offices { get; set; }
+        public string Month { get; set; } = string.Empty;
     }
 }
