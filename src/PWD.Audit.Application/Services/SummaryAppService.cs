@@ -158,6 +158,13 @@ namespace PWD.Audit.Services
             var finacialYears = objections.Select(x => x.FinancialYear).Distinct().ToList();
 
             var result = new YearlySummaryDto() { OfficeCode = officeCode };
+            //result.TotalSummary
+            //s.typeName
+            //s.count
+            //s.value
+            //s.broadSheet
+            //s.nonBroadSheet
+            //s.resolved
 
             foreach (var year in finacialYears)
             {
@@ -169,7 +176,7 @@ namespace PWD.Audit.Services
                 var sfi = yearlyObjections.Where(o => o.ObjectionType == ObjectionType.SFI);
                 var nsfi = yearlyObjections.Where(o => o.ObjectionType == ObjectionType.NonSFI);
                 var dr = yearlyObjections.Where(o => o.ObjectionType == ObjectionType.Draft);
-                
+
                 // Process the yearly objections and create YearlySummaryDetailsDto
                 var sfiLine = new SummaryLineDto()
                 {
@@ -203,18 +210,25 @@ namespace PWD.Audit.Services
                 };
                 var totalLine = new SummaryLineDto()
                 {
-                    Count = objections.Count(),
-                    BroadSheet = objections.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetAnswered),
-                    Resolved = objections.Count(x => x.ObjectionStatus == ObjectionStatus.Resolved),
-                    NonBroadSheet = objections.Count(x => x.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered),
-                    Value = objections.Sum(x => x.Value),
-                    Type = Enum.ObjectionType.Draft,
-                    TypeName = "মোট",
+                    Count = sfiLine.Count + nsfiLine.Count + drLine.Count,
+                    BroadSheet = sfiLine.BroadSheet + nsfiLine.BroadSheet + drLine.BroadSheet,
+                    Resolved = sfiLine.Resolved + nsfiLine.Resolved + drLine.Resolved,
+                    NonBroadSheet = sfiLine.NonBroadSheet + nsfiLine.NonBroadSheet + drLine.NonBroadSheet,
+                    Value = sfiLine.Value + nsfiLine.Value + drLine.Value,
+                    Type = Enum.ObjectionType.None,
+                    TypeName = "উপমোট",
                 };
                 yearlySummaryDetail.SummaryLines.Add(sfiLine);
                 yearlySummaryDetail.SummaryLines.Add(nsfiLine);
                 yearlySummaryDetail.SummaryLines.Add(drLine);
                 yearlySummaryDetail.SummaryLines.Add(totalLine);
+
+                result.TotalSummary.Count += totalLine.Count;
+                result.TotalSummary.BroadSheet += totalLine.BroadSheet;
+                result.TotalSummary.Resolved += totalLine.Resolved;
+                result.TotalSummary.NonBroadSheet += totalLine.NonBroadSheet;
+                result.TotalSummary.Value += totalLine.Value;
+
                 result.YearlySummaryDetails.Add(yearlySummaryDetail);
             }
 
@@ -410,8 +424,11 @@ namespace PWD.Audit.Services
             summary.SubTotalObjectionNumber = summary.PreviousObjectionNumber + summary.CurrentObjectionNumber;
             summary.SubTotalObjectionAmount = summary.PreviousObjectionAmount + summary.CurrentObjectionAmount;
 
+            //previousBroadsheetNumber,unsetteledBroadsheetNumber
             summary.PreviousBroadsheetNumber = previousMonthData.Count(p => p.ObjectionStatus == ObjectionStatus.BroadSheetAnswered);
             summary.UnsetteledBroadsheetNumber = list.Count - list.Count(l => l.ObjectionStatus == ObjectionStatus.Resolved) - list.Count(l => l.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered);
+            //summary.PreviousBroadsheetNumber = previousMonthData.Count(p => p.ObjectionStatus == ObjectionStatus.BroadSheetAnswered);
+            //summary.UnsetteledBroadsheetNumber = list.Count - list.Count(l => l.ObjectionStatus == ObjectionStatus.Resolved) - list.Count(l => l.ObjectionStatus == ObjectionStatus.BroadSheetNotAnswered);
 
             //summary.CurrentObjectionSettlementNumber = currentMonthData.Count(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay);
             //summary.CurrentObjectionSettlementAmount = currentMonthData.Where(c => c.MemoDate >= firstDayOfCurrentMonth && c.MemoDate <= currentDay).Sum(s => s.Value);
@@ -426,7 +443,7 @@ namespace PWD.Audit.Services
 
             return summary;
         }
-        
+
         //private SummaryReportDto AssignData(List<ObjectionDto> list)
         //{
         //    var currentDay = DateTime.Today;
