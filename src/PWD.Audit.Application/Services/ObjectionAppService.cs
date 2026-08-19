@@ -340,7 +340,7 @@ namespace PWD.Audit.Services
                     var latestResponse = objectionDto.ResponseHistories.OrderByDescending(r => r.Id).FirstOrDefault();
                     if (latestResponse != null)
                     {
-                        objectionDto.ResponseHistories = new List<ResponseHistoryDto> { latestResponse };
+                        objectionDto.ResponseHistories = new List<ResponseDto> { latestResponse };
                     }
                 }
             }
@@ -358,5 +358,18 @@ namespace PWD.Audit.Services
             return ObjectMapper.Map<Objection, ObjectionDto>(objection);
         }
 
+        public async Task<ObjectionDto> UpdateObjectionStatusAsync(ObjectionDto input)
+        {
+            var objection = await _repository.GetAsync(input.Id);
+            if (objection == null)
+            {
+                throw new KeyNotFoundException($"Objection with ID {input.Id} not found.");
+            }
+
+            objection.ObjectionStatus = input.ObjectionStatus;
+            await _repository.UpdateAsync(objection);
+            return ObjectMapper.Map<Objection, ObjectionDto>(objection);
+        }
+        
     }
 }

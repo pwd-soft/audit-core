@@ -16,5 +16,6 @@ namespace PWD.Audit.Interfaces
         Task<ObjectionDto> UpdateAsync(ObjectionDto input);
         Task<List<ObjectionDto>> GetListByOfficeCodeAsync(string officeCode);
         Task<List<ObjectionDto>> GetIncomingResponseListAsync(string officeCode);
+        Task<ObjectionDto> UpdateObjectionStatusAsync(ObjectionDto input);
     }    
 }

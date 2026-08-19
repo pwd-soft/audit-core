@@ -34,7 +34,7 @@ namespace PWD.Audit.DtoModels
         public bool IsCentralEntry { get; set; } = false;
         public bool HasAttachment { get; set; } = false;
 
-        public List<ResponseHistoryDto> ResponseHistories { get; set; }
+        public List<ResponseDto> ResponseHistories { get; set; }
         public List<AttachmentDto> Attachments { get; set; } = new List<AttachmentDto>();
     }
 

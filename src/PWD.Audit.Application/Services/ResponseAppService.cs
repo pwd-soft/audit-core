@@ -37,9 +37,9 @@ namespace PWD.Audit.Services
             _attachmentService = attachmentService;
         }
 
-        public async Task<ResponseHistoryDto> CreateAsync(ResponseHistoryDto input)
+        public async Task<ResponseDto> CreateAsync(ResponseDto input)
         {
-            var responseHistory = ObjectMapper.Map<ResponseHistoryDto, ResponseHistory>(input);
+            var responseHistory = ObjectMapper.Map<ResponseDto, ResponseHistory>(input);
             var newresponseHistory = await _repository.InsertAsync(responseHistory, true);
 
             //if (input.FileDataInput?.Count > 0)
@@ -50,6 +50,15 @@ namespace PWD.Audit.Services
             //var updateAttachmentField = await _repository.GetAsync(newresponseHistory.Id);
             //updateAttachmentField.Attachments = JsonSerializer.Serialize(input.FileDataInput);
             //await _repository.UpdateAsync(updateAttachmentField);
+
+
+            //Update objection status based on the response
+            var objectionUpdate = new ObjectionDto
+            {
+                Id = input.ObjectionId,
+                ObjectionStatus = input.ObjectionStatus
+            };
+            await _objectionService.UpdateObjectionStatusAsync(objectionUpdate);
 
             if (input.Attachments.Count > 0)
             {
@@ -74,12 +83,12 @@ namespace PWD.Audit.Services
                 User = input.User,
                 PostingId = userInfo.PostingId,
                 IsLocked = false,
-                Note = $"Response initiated from {input.User}"
+                Note = $"Response from {input.User}"
             };
             await _responseStateRepository.InsertAsync(responseState, true);
 
-            return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(newresponseHistory);
-            //return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(new ResponseHistory());
+            return ObjectMapper.Map<ResponseHistory, ResponseDto>(newresponseHistory);
+            //return ObjectMapper.Map<ResponseHistory, ResponseDto>(new ResponseHistory());
         }
 
         private List<FileDataInput> ProcessAttachments(int objectionId, List<FileDataInput> fileDataInput, string attachments)
@@ -144,26 +153,26 @@ namespace PWD.Audit.Services
             throw new NotImplementedException();
         }
 
-        public async Task<ResponseHistoryDto> GetByIdAsync(int id)
+        public async Task<ResponseDto> GetByIdAsync(int id)
         {
             //var responseWithDetails = await _repository.WithDetailsAsync(o => o.Associates, r => r.ResponseHistory);
             var responses = await _repository.WithDetailsAsync(r => r.ResponseComments);
             var responseWithDetails = responses.FirstOrDefault(r => r.Id == id);
-            return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(responseWithDetails);
+            return ObjectMapper.Map<ResponseHistory, ResponseDto>(responseWithDetails);
         }
 
-        public Task<List<ResponseHistoryDto>> GetListAsync()
+        public Task<List<ResponseDto>> GetListAsync()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<List<ResponseHistoryDto>> GetListByObjectionIdAsync(int objectionId)
+        public async Task<List<ResponseDto>> GetListByObjectionIdAsync(int objectionId)
         {
             var responseWithDetails = await _repository.GetListAsync(r => r.ObjectionId == objectionId);
-            return ObjectMapper.Map<List<ResponseHistory>, List<ResponseHistoryDto>>(responseWithDetails);
+            return ObjectMapper.Map<List<ResponseHistory>, List<ResponseDto>>(responseWithDetails);
         }
 
-        public async Task<ResponseHistoryDto> UpdateAsync(ResponseHistoryDto input)
+        public async Task<ResponseDto> UpdateAsync(ResponseDto input)
         {
             var response = await _repository.GetAsync(r => r.Id == input.Id);
 
@@ -178,7 +187,15 @@ namespace PWD.Audit.Services
 
             var updatedResponse = await _repository.UpdateAsync(response);
 
-            if(input.Attachments.Count > 0)
+            //Update objection status based on the response
+            var objectionUpdate = new ObjectionDto
+            {
+                Id = input.ObjectionId,
+                ObjectionStatus = input.ObjectionStatus
+            };
+            await _objectionService.UpdateObjectionStatusAsync(objectionUpdate);
+
+            if (input.Attachments.Count > 0)
             {
                 foreach (var attachment in input.Attachments)
                 {
@@ -191,7 +208,7 @@ namespace PWD.Audit.Services
                 _attachmentService.InsertBulkAsync(input.Attachments).GetAwaiter().GetResult();
             }
 
-            return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(response);
+            return ObjectMapper.Map<ResponseHistory, ResponseDto>(response);
         }
 
         //public async Task UpdateResponseFlow()
@@ -240,7 +257,7 @@ namespace PWD.Audit.Services
             return ObjectMapper.Map<ResponseState, ResponseStateDto>(newResponseState);
         }
         
-        public async Task<ResponseHistoryDto> UpdateResponseStatus(ResponseHistoryDto input)
+        public async Task<ResponseDto> UpdateResponseStatus(ResponseDto input)
         {
             var responseStates = await _responseStateRepository.GetListAsync(r => r.ResponseHistoryId == input.Id);
             var latestState = responseStates.OrderByDescending(r => r.CreationTime).FirstOrDefault();
@@ -295,7 +312,7 @@ namespace PWD.Audit.Services
                 }
             }
 
-            return ObjectMapper.Map<ResponseHistory, ResponseHistoryDto>(response);
+            return ObjectMapper.Map<ResponseHistory, ResponseDto>(response);
         }
     }
 }

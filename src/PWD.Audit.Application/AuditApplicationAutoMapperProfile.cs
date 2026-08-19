@@ -20,8 +20,8 @@ namespace PWD.Audit
             CreateMap<Objection, ObjectionDto>();
             CreateMap<ObjectionDto, Objection>();
 
-            CreateMap<ResponseHistory, ResponseHistoryDto>();
-            CreateMap<ResponseHistoryDto, ResponseHistory>();
+            CreateMap<ResponseHistory, ResponseDto>();
+            CreateMap<ResponseDto, ResponseHistory>();
 
             CreateMap<Associate, AssociateDto>();
             CreateMap<AssociateDto, Associate>();

@@ -8,12 +8,12 @@ namespace PWD.Audit.Interfaces
 {
     public interface IResponseAppService
     {
-        Task<ResponseHistoryDto> CreateAsync(ResponseHistoryDto input);
+        Task<ResponseDto> CreateAsync(ResponseDto input);
         Task DeleteAsync(int id);
-        Task<ResponseHistoryDto> GetByIdAsync(int id);
-        Task<List<ResponseHistoryDto>> GetListAsync();
-        Task<ResponseHistoryDto> UpdateAsync(ResponseHistoryDto input);
-        Task<List<ResponseHistoryDto>> GetListByObjectionIdAsync(int objectionId);
+        Task<ResponseDto> GetByIdAsync(int id);
+        Task<List<ResponseDto>> GetListAsync();
+        Task<ResponseDto> UpdateAsync(ResponseDto input);
+        Task<List<ResponseDto>> GetListByObjectionIdAsync(int objectionId);
         Task<ResponseStateDto> UpdateResponseStateAsync(ResponseStateDto responseStateDto);
     }
 }
