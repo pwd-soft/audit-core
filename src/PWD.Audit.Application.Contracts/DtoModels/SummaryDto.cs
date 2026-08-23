@@ -13,6 +13,7 @@ namespace PWD.Audit.DtoModels
         public string ReferenceNo { get; set; }
         public int Note { get; set; }
         public List<SummaryLineDto> SummaryLines { get; set; }=new List<SummaryLineDto>();
+        public string Layer { get; set; }
     }
 
 }

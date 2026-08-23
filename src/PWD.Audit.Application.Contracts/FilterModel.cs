@@ -34,4 +34,23 @@ namespace PWD.Audit
         //public string Attachments { get; set; }
         //public List<AssociateDto> Associates { get; set; }
     }
+    
+    public class ResponseFilterModel : FilterModel
+    {
+        public string? OfficeCode { get; set; }
+        public string? FinancialYear { get; set; }
+        public ObjectionType? ObjectionType { get; set; }
+        public DirectorateType? DirectorateType { get; set; }
+        //public string? SearchWithOfficeCode { get; set; } = string.Empty;
+        //public ObjectionStatus? ObjectionStatus { get; set; }
+        //public bool IsActive { get; set; } = true;
+        //public DateTime Date { get; set; }
+        //public string Name { get; set; }
+        //public string Description { get; set; }
+        //public string Response { get; set; }
+        //public double Value { get; set; }
+        //public string Note { get; set; }
+        //public string Attachments { get; set; }
+        //public List<AssociateDto> Associates { get; set; }
+    }
 }

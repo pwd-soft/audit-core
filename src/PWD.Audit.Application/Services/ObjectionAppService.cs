@@ -348,6 +348,54 @@ namespace PWD.Audit.Services
             return objectionListDto;
         }
 
+        public async Task<GenericListDto<ObjectionDto>> GetIncomingResponseListWithPagingAsync(ResponseFilterModel filterCriteria)
+        {
+            GenericListDto<ObjectionDto> objectionList = new GenericListDto<ObjectionDto>();
+
+            const string AuditEE = "ee_audit";
+            var states = await _responseStateRepository.WithDetailsAsync();
+            var stateList = states.Where(i => i.User == filterCriteria.OfficeCode && i.IsLocked == false).ToList();
+            if (filterCriteria.OfficeCode == "se_audit")
+                stateList.AddRange(states.Where(i => i.User == AuditEE && i.IsLocked == false).ToList());
+            var objectionIds = stateList.Select(s => s.ObjectionId).Distinct().ToList();
+
+            var queryableList = await _repository.WithDetailsAsync(r => r.ResponseHistories); 
+            
+            if (filterCriteria.DirectorateType > 0)
+                queryableList = queryableList.Where(o => o.DirectorateType == filterCriteria.DirectorateType);
+
+            if (filterCriteria.ObjectionType > 0)
+                queryableList = queryableList.Where(o => o.ObjectionType == filterCriteria.ObjectionType);
+
+            if (!String.IsNullOrEmpty(filterCriteria.FinancialYear))
+                queryableList = queryableList.Where(o => o.FinancialYear == filterCriteria.FinancialYear);
+
+            //var objections = await _repository.WithDetailsAsync(r => r.ResponseHistories);
+            var objections = queryableList.Where(i => objectionIds.Contains(i.Id));
+            //objections
+            objectionList.CountData = objections.Count();
+
+            queryableList = queryableList
+                .Skip(filterCriteria.Offset)
+                .Take(filterCriteria.Limit);
+
+            objectionList.ListData = ObjectMapper.Map<IQueryable<Objection>, List<ObjectionDto>>(objections);
+
+            foreach (var objectionDto in objectionList.ListData)
+            {
+                if (objectionDto.ResponseHistories.Count > 0)
+                {
+                    var latestResponse = objectionDto.ResponseHistories.OrderByDescending(r => r.Id).FirstOrDefault();
+                    if (latestResponse != null)
+                    {
+                        objectionDto.ResponseHistories = new List<ResponseDto> { latestResponse };
+                    }
+                }
+            }
+
+            return objectionList;
+        }
+
         public async Task<ObjectionDto> GetByIdAsync(int id)
         {
             var objection = await _repository.GetAsync(id);

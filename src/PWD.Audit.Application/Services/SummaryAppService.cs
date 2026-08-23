@@ -91,6 +91,7 @@ namespace PWD.Audit.Services
             {
                 var summary = await GetByOffice(office.code);
                 summary.OfficeName = office.displayNameBn;
+                summary.Layer = office.layer;
                 result.Add(summary);
             }
             return result;

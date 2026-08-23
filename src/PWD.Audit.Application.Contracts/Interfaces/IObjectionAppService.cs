@@ -1,4 +1,5 @@
-﻿using PWD.Audit.DtoModels;
+﻿using PWD.Attendance_Swagger.DtoModels;
+using PWD.Audit.DtoModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,5 +18,6 @@ namespace PWD.Audit.Interfaces
         Task<List<ObjectionDto>> GetListByOfficeCodeAsync(string officeCode);
         Task<List<ObjectionDto>> GetIncomingResponseListAsync(string officeCode);
         Task<ObjectionDto> UpdateObjectionStatusAsync(ObjectionDto input);
+        Task<GenericListDto<ObjectionDto>> GetIncomingResponseListWithPagingAsync(ResponseFilterModel filterCriteria);
     }    
 }
